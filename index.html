@@ -1,9 +1,11 @@
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Dolivar - Calculadora BCV Profesional</title>
     
-    <!-- ✅ Nuevas meta tags obligatorias -->
+    <!-- ✅ Nombre y descripción obligatorios para PWABuilder -->
     <meta name="name" content="Dolivar">
     <meta name="description" content="Calculadora inteligente para sumar y convertir precios en dólares (US$) y bolívares (Bs) al instante.">
     
@@ -12,9 +14,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <!-- Ícono -->
+    <!-- Ícono PWA -->
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMxZTI5M2IiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2Y4ZmFmYyIgZm9udC1zaXplPSIxMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiPlVTJMKgL0JzPC90ZXh0Pjwvc3ZnPg==">
 
+    <!-- ✅ Manifest físico (NO en base64) -->
+    <link rel="manifest" href="manifest.json">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -65,7 +70,7 @@
             border-radius: 2.5rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
             padding: 1.25rem;
-            border: 1px solid var(--border-btn);
+            border: 1.5px solid var(--border-btn);
             position: relative;
             max-height: 95dvh;
             overflow: hidden;
@@ -282,7 +287,7 @@
 <div class="calc-container">
     <div id="modal-overlay" class="modal-overlay" onclick="closeAllModals()"></div>
     
-    <!-- Modal de Configuración (¡CON SLIDERS!) -->
+    <!-- Modal de Configuración -->
     <div id="settings-modal" class="settings-modal">
         <h3 class="font-bold text-lg mb-4">Configuración</h3>
         <div class="flex flex-col gap-4">
@@ -423,14 +428,6 @@
 /* 
  * Dolivar - Calculadora BCV Profesional
  * Última actualización: 05/01/2026
- * 
- * Historial de cambios:
- * - 05/01/2026 v1.2.4:
- *   • PWA 100% funcional (instalable en Chrome)
- *   • Sliders independientes para volumen y vibración
- *   • Persistencia en localStorage
- *   • Corrección total de independencia funcional
- *   • Diseño responsivo mejorado
  */
 
 let currentInputText = '0';
@@ -441,8 +438,6 @@ let inputCurrency = 'USD';
 let audioCtx = null;
 let lastOperator = null;
 let nextNumberIsMultiplier = false;
-
-// Cargar configuración guardada
 let volumeLevel = parseFloat(localStorage.getItem('dolivar_volume') || '1.0');
 let vibrationDuration = parseInt(localStorage.getItem('dolivar_vibration') || '100');
 
@@ -460,7 +455,6 @@ const vibrationSlider = document.getElementById('vibration-slider');
 const volumeValue = document.getElementById('volume-value');
 const vibrationValue = document.getElementById('vibration-value');
 
-// Inicializar sliders
 if (volumeSlider) {
     volumeSlider.value = Math.round(volumeLevel * 100);
     volumeValue.textContent = Math.round(volumeLevel * 100) + '%';
@@ -470,25 +464,19 @@ if (vibrationSlider) {
     vibrationValue.textContent = vibrationDuration + ' ms';
 }
 
-// Eventos de los sliders
 if (vibrationSlider) {
     vibrationSlider.addEventListener('input', () => {
         vibrationDuration = parseInt(vibrationSlider.value);
         vibrationValue.textContent = vibrationDuration + ' ms';
         localStorage.setItem('dolivar_vibration', vibrationDuration.toString());
-        // Feedback táctil al ajustar
-        if (navigator.vibrate && vibrationDuration > 0) {
-            navigator.vibrate(vibrationDuration > 50 ? 50 : vibrationDuration);
-        }
+        if (navigator.vibrate && vibrationDuration > 0) navigator.vibrate(50);
     });
 }
-
 if (volumeSlider) {
     volumeSlider.addEventListener('input', () => {
         volumeLevel = parseFloat(volumeSlider.value) / 100;
         volumeValue.textContent = volumeSlider.value + '%';
         localStorage.setItem('dolivar_volume', volumeLevel.toString());
-        // Feedback auditivo al ajustar
         playSoundPreview();
     });
 }
@@ -499,24 +487,20 @@ function playSoundPreview() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    osc.connect(gain); gain.connect(audioCtx.destination);
     osc.frequency.setValueAtTime(600, audioCtx.currentTime);
     gain.gain.setValueAtTime(volumeLevel * 0.1, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.15);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.15);
 }
 
-// Sonido independiente
 function playSound(type) {
     if (volumeLevel <= 0) return;
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const oscillator = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+    oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
     let freq;
     switch(type) {
         case 'num': freq = 600; break;
@@ -532,14 +516,12 @@ function playSound(type) {
     oscillator.stop(audioCtx.currentTime + 0.2);
 }
 
-// Vibración independiente
 function vibrate() {
     if (vibrationDuration > 0 && navigator.vibrate) {
         navigator.vibrate(vibrationDuration);
     }
 }
 
-// Retroalimentación combinada
 function provideFeedback(type = 'op') {
     vibrate();
     playSound(type);
