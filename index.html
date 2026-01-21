@@ -213,7 +213,7 @@
             padding-left: 8px;
             margin-left: 8px;
             max-width: calc(100% - 50px);
-            font-size: 1.15rem; /* ✅ Fuente más grande en historial */
+            font-size: 1.15rem; /* ✅ Fuente más grande */
         }
         #operation-history::-webkit-scrollbar {
             display: none;
@@ -262,7 +262,6 @@
             flex-grow: 1;
         }
 
-        /* Estilo para sliders */
         input[type="range"] {
             -webkit-appearance: none;
             width: 100%;
@@ -280,37 +279,6 @@
             background: #7D1935;
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        /* Menú emergente para selector de moneda */
-        #currency-menu {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--bg-modal);
-            color: var(--text-modal);
-            border-radius: 1rem;
-            padding: 0.5rem 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            z-index: 60;
-            display: none;
-            width: 140px;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        #currency-menu button {
-            display: block;
-            width: 100%;
-            padding: 0.5rem;
-            background: none;
-            border: none;
-            color: var(--text-modal);
-            text-align: center;
-            font-size: 0.95rem;
-            cursor: pointer;
-        }
-        #currency-menu button:hover {
-            background: rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -335,7 +303,13 @@
                 </div>
             </div>
 
-            <!-- Control de Volumen -->
+            <div class="p-3 bg-black/10 rounded-xl cursor-pointer" onclick="setInputPair('usd-bs')">
+                <span>Modo de entrada: US$/Bs</span>
+            </div>
+            <div class="p-3 bg-black/10 rounded-xl cursor-pointer" onclick="setInputPair('eur-bs')">
+                <span>Modo de entrada: Euro/Bs</span>
+            </div>
+
             <div class="p-3 bg-black/10 rounded-xl">
                 <div class="flex justify-between items-center mb-2">
                     <span>🔊 Volumen</span>
@@ -345,7 +319,6 @@
                        class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer">
             </div>
 
-            <!-- Control de Vibración -->
             <div class="p-3 bg-black/10 rounded-xl">
                 <div class="flex justify-between items-center mb-2">
                     <span>📳 Vibración</span>
@@ -381,7 +354,7 @@
             <p class="font-bold mt-3">Guía de Uso</p>
             <ul>
                 <li>🔹 <strong>Conversión en Tiempo Real</strong>: Al introducir un monto, la calculadora muestra automáticamente la equivalencia en las otras monedas basándose en las tasas oficiales.</li>
-                <li>🔹 <strong>Cambio de Moneda</strong>: Mantén presionado el botón del selector durante 2 segundos para alternar entre USD y EUR.</li>
+                <li>🔹 <strong>Cambio de Moneda</strong>: Toca el botón del selector para alternar entre la moneda fuerte y los bolívares dentro del par seleccionado.</li>
                 <li>🔹 <strong>Jerarquía Matemática</strong>: El sistema procesa primero multiplicaciones/divisiones y luego sumas/restas, garantizando resultados exactos en operaciones complejas.</li>
                 <li>🔹 <strong>Tasas BCV y EUR</strong>: Los datos se sincronizan con APIs oficiales. Puedes forzar una actualización tocando la barra superior.</li>
                 <li>🔹 <strong>Historial</strong>: En la parte superior de la pantalla de visualización, verás la secuencia de tu operación actual.</li>
@@ -430,12 +403,8 @@
     <div class="grid-buttons">
         <div class="btn btn-clear" onclick="clearDisplay()">AC</div>
         <div class="btn btn-del" onclick="deleteLast()">Del</div>
-        <div class="btn btn-op relative" id="currency-btn" style="font-size: 1.4rem; font-weight: 800;">
+        <div class="btn btn-op" onclick="toggleCurrencyMode()" style="font-size: 1.4rem; font-weight: 800;">
             <span id="currency-symbol">US$</span>
-            <div id="currency-menu">
-                <button data-mode="usd">US$/Bs</button>
-                <button data-mode="eur">Euro/Bs</button>
-            </div>
         </div>
         <div class="btn btn-op" onclick="setOperator('/')">÷</div>
 
@@ -464,7 +433,7 @@
 /* 
  * Dolivar - Calculadora BCV Profesional
  * Última actualización: 22/01/2026
- * v1.2.6: Selector de moneda con long press + corrección de API + historial más legible
+ * v1.2.6: Selector de par en Configuración + botón alterna dentro del par + historial más legible
  */
 
 let currentInputText = '0';
@@ -472,7 +441,8 @@ let expressionTokens = [];
 let isNewInput = true;
 let bcvRate = null;      // Tasa USD/Bs
 let eurRate = null;      // Tasa EUR/Bs
-let inputCurrency = 'USD'; // Solo 'USD' o 'EUR'
+let inputPair = 'usd-bs'; // 'usd-bs' o 'eur-bs'
+let inputCurrency = 'USD'; // 'USD', 'EUR' o 'BS' (solo para display)
 let audioCtx = null;
 let lastOperator = null;
 let nextNumberIsMultiplier = false;
@@ -492,10 +462,9 @@ const volumeSlider = document.getElementById('volume-slider');
 const vibrationSlider = document.getElementById('vibration-slider');
 const volumeValue = document.getElementById('volume-value');
 const vibrationValue = document.getElementById('vibration-value');
-const currencyBtn = document.getElementById('currency-btn');
-const currencyMenu = document.getElementById('currency-menu');
 const currencySymbol = document.getElementById('currency-symbol');
 
+// Inicializar controles
 if (volumeSlider) {
     volumeSlider.value = Math.round(volumeLevel * 100);
     volumeValue.textContent = Math.round(volumeLevel * 100) + '%';
@@ -505,6 +474,7 @@ if (vibrationSlider) {
     vibrationValue.textContent = vibrationDuration + ' ms';
 }
 
+// Eventos sliders
 if (vibrationSlider) {
     vibrationSlider.addEventListener('input', () => {
         vibrationDuration = parseInt(vibrationSlider.value);
@@ -522,6 +492,7 @@ if (volumeSlider) {
     });
 }
 
+// Sonido y vibración
 function playSoundPreview() {
     if (volumeLevel <= 0) return;
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -568,6 +539,7 @@ function provideFeedback(type = 'op') {
     playSound(type);
 }
 
+// Modales
 function toggleSettings() {
     provideFeedback('op');
     settingsModal.classList.add('active');
@@ -579,7 +551,6 @@ function closeAllModals() {
     helpModal.classList.remove('active');
     aboutModal.classList.remove('active');
     modalOverlay.classList.remove('active');
-    currencyMenu.style.display = 'none';
 }
 
 function showHelp() {
@@ -592,6 +563,7 @@ function showAbout() {
     aboutModal.classList.add('active');
 }
 
+// Tema
 function initTheme() {
     const savedTheme = localStorage.getItem('calc-theme');
     const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -618,13 +590,13 @@ function toggleTheme() {
     }
 }
 
-// ✅ Nueva función: obtiene tasas de USD y EUR con fallback correcto
+// ✅ Obtención de tasas (USD + EUR)
 async function fetchBCVRates() {
     rateLabel.innerHTML = "Sincronizando tasas...";
     dateLabel.innerHTML = "";
     rateLabel.classList.add('loading-pulse');
     
-    // Intento 1: API principal (dolarvzla.com)
+    // Intento 1: API principal
     try {
         const response1 = await fetch("https://api.dolarvzla.com/public/exchange-rate");
         if (response1.ok) {
@@ -641,7 +613,7 @@ async function fetchBCVRates() {
         console.warn("API principal falló:", e1);
     }
 
-    // Intento 2: API de respaldo (ve.dolarapi.com) — solo para USD
+    // Intento 2: API de respaldo (solo USD)
     try {
         const response2 = await fetch("https://ve.dolarapi.com/v1/dolares");
         if (response2.ok) {
@@ -649,10 +621,7 @@ async function fetchBCVRates() {
             const oficial = data2.find(d => d.nombre?.toLowerCase().includes('oficial'));
             if (oficial && oficial.promedio) {
                 bcvRate = parseFloat(oficial.promedio);
-                // No hay EUR en esta API → mantener eurRate anterior si existe, o usar proporción
-                if (!eurRate) {
-                    eurRate = bcvRate * 1.17; // estimación conservadora
-                }
+                if (!eurRate) eurRate = bcvRate * 1.17;
                 saveRatesToStorage(bcvRate, eurRate, new Date().toISOString().split('T')[0]);
                 displayRates();
                 return;
@@ -662,7 +631,7 @@ async function fetchBCVRates() {
         console.warn("API de respaldo falló:", e2);
     }
 
-    // Intento 3: Usar últimas tasas guardadas
+    // Intento 3: usar últimas guardadas
     const lastUSD = localStorage.getItem('dolivar_last_usd_rate');
     const lastEUR = localStorage.getItem('dolivar_last_eur_rate');
     if (lastUSD && lastEUR) {
@@ -675,19 +644,16 @@ async function fetchBCVRates() {
         return;
     }
 
-    // ❌ Todas fallaron
     rateLabel.innerText = "⚠️ Error de red. Reintentar";
     rateLabel.classList.remove('loading-pulse');
 }
 
-// Guardar tasas en localStorage
 function saveRatesToStorage(usd, eur, date) {
     localStorage.setItem('dolivar_last_usd_rate', usd.toString());
     localStorage.setItem('dolivar_last_eur_rate', eur.toString());
     localStorage.setItem('dolivar_last_date', date);
 }
 
-// Mostrar tasas en UI
 function displayRates() {
     if (!bcvRate || !eurRate) return;
     
@@ -704,35 +670,30 @@ function displayRates() {
     updateUI();
 }
 
-// ✅ Nuevo selector con long press
-let longPressTimer = null;
-
-currencyBtn.addEventListener('mousedown', startLongPress);
-currencyBtn.addEventListener('mouseup', endLongPress);
-currencyBtn.addEventListener('mouseleave', endLongPress);
-currencyBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startLongPress(); });
-currencyBtn.addEventListener('touchend', endLongPress);
-
-function startLongPress() {
-    longPressTimer = setTimeout(() => {
-        currencyMenu.style.display = 'block';
-    }, 2000);
+// ✅ Cambiar par desde configuración
+function setInputPair(pair) {
+    provideFeedback('op');
+    inputPair = pair;
+    localStorage.setItem('dolivar_input_pair', pair);
+    
+    // Reiniciar a moneda fuerte
+    if (pair === 'usd-bs') {
+        inputCurrency = 'USD';
+        currencySymbol.textContent = 'US$';
+    } else {
+        inputCurrency = 'EUR';
+        currencySymbol.textContent = '€';
+    }
+    
+    currentInputText = '0';
+    expressionTokens = [];
+    isNewInput = true;
+    updateUI();
+    closeAllModals();
 }
 
-function endLongPress() {
-    clearTimeout(longPressTimer);
-}
-
-// Selección en menú
-currencyMenu.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const newMode = btn.dataset.mode;
-        setCurrencyMode(newMode);
-        currencyMenu.style.display = 'none';
-    });
-});
-
-function setCurrencyMode(mode) {
+// ✅ Alternar moneda dentro del par
+function toggleCurrencyMode() {
     provideFeedback('op');
     if (!bcvRate || !eurRate) {
         alert("⚠️ Primero sincroniza las tasas.");
@@ -741,27 +702,32 @@ function setCurrencyMode(mode) {
 
     let currentVal = parseFloat(currentInputText.replace(/,/g, '')) || 0;
 
-    if (mode === 'usd' && inputCurrency !== 'USD') {
-        // Convertir desde EUR o BS a USD
-        if (inputCurrency === 'EUR') {
-            currentVal = currentVal * eurRate / bcvRate;
-        } else { // BS
-            currentVal = currentVal / bcvRate;
-        }
-        inputCurrency = 'USD';
-        currencySymbol.textContent = 'US$';
-    } else if (mode === 'eur' && inputCurrency !== 'EUR') {
-        // Convertir desde USD o BS a EUR
+    if (inputPair === 'usd-bs') {
         if (inputCurrency === 'USD') {
-            currentVal = currentVal * bcvRate / eurRate;
-        } else { // BS
-            currentVal = currentVal / eurRate;
+            // Convertir a Bs
+            currentInputText = (currentVal * bcvRate).toFixed(2);
+            inputCurrency = 'BS';
+            currencySymbol.textContent = 'Bs';
+        } else {
+            // Convertir a USD
+            currentInputText = (currentVal / bcvRate).toFixed(2);
+            inputCurrency = 'USD';
+            currencySymbol.textContent = 'US$';
         }
-        inputCurrency = 'EUR';
-        currencySymbol.textContent = '€';
+    } else { // eur-bs
+        if (inputCurrency === 'EUR') {
+            // Convertir a Bs
+            currentInputText = (currentVal * eurRate).toFixed(2);
+            inputCurrency = 'BS';
+            currencySymbol.textContent = 'Bs';
+        } else {
+            // Convertir a EUR
+            currentInputText = (currentVal / eurRate).toFixed(2);
+            inputCurrency = 'EUR';
+            currencySymbol.textContent = '€';
+        }
     }
 
-    currentInputText = currentVal.toFixed(2);
     if (currentInputText.endsWith('.00')) {
         currentInputText = parseInt(parseFloat(currentInputText)).toString();
     }
@@ -769,6 +735,7 @@ function setCurrencyMode(mode) {
     updateUI();
 }
 
+// Actualizar UI
 function updateUI() {
     let prefix, convertedText;
     
@@ -777,6 +744,8 @@ function updateUI() {
         prefix = '$ ';
     } else if (inputCurrency === 'EUR') {
         prefix = '€ ';
+    } else {
+        prefix = 'Bs. ';
     }
 
     let displayVal = currentInputText;
@@ -797,10 +766,18 @@ function updateUI() {
     // Calcular valor convertido
     if (bcvRate && eurRate) {
         let val = parseFloat(currentInputText.replace(/,/g, '')) || 0;
-        if (inputCurrency === 'USD') {
-            convertedText = `Bs. ${(val * bcvRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} | € ${(val * bcvRate / eurRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        } else if (inputCurrency === 'EUR') {
-            convertedText = `Bs. ${(val * eurRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} | $ ${(val * eurRate / bcvRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        if (inputPair === 'usd-bs') {
+            if (inputCurrency === 'USD') {
+                convertedText = `Bs. ${(val * bcvRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            } else { // BS
+                convertedText = `$ ${(val / bcvRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            }
+        } else { // eur-bs
+            if (inputCurrency === 'EUR') {
+                convertedText = `Bs. ${(val * eurRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            } else { // BS
+                convertedText = `€ ${(val / eurRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            }
         }
     } else {
         convertedText = "Tasa no disponible";
@@ -829,13 +806,14 @@ function updateHistory() {
         if (nextNumberIsMultiplier) {
             displayParts.push(currentInputText);
         } else {
-            const prefix = inputCurrency === 'USD' ? '$' : '€';
+            const prefix = inputCurrency === 'USD' ? '$' : inputCurrency === 'EUR' ? '€' : 'Bs';
             displayParts.push(prefix + currentInputText);
         }
     }
     opHistoryDisplay.innerText = displayParts.join('');
 }
 
+// Botones numéricos
 function addNum(n) {
     provideFeedback('num');
     if (isNewInput) {
@@ -925,10 +903,18 @@ function calc() {
     expressionTokens.push(captureCurrentNumber());
     const resultUSD = evaluateWithPrecedence(expressionTokens, bcvRate, eurRate);
     
-    if (inputCurrency === 'USD') {
-        currentInputText = resultUSD.toFixed(2);
-    } else if (inputCurrency === 'EUR') {
-        currentInputText = (resultUSD * bcvRate / eurRate).toFixed(2);
+    if (inputPair === 'usd-bs') {
+        if (inputCurrency === 'USD') {
+            currentInputText = resultUSD.toFixed(2);
+        } else {
+            currentInputText = (resultUSD * bcvRate).toFixed(2);
+        }
+    } else { // eur-bs
+        if (inputCurrency === 'EUR') {
+            currentInputText = (resultUSD * bcvRate / eurRate).toFixed(2);
+        } else {
+            currentInputText = (resultUSD * bcvRate).toFixed(2);
+        }
     }
     
     if (currentInputText.endsWith('.00')) {
@@ -951,14 +937,23 @@ function clearDisplay() {
     updateUI(); 
 }
 
-// Cerrar menú si se hace clic fuera
-document.addEventListener('click', (e) => {
-    if (!currencyBtn.contains(e.target) && !currencyMenu.contains(e.target)) {
-        currencyMenu.style.display = 'none';
+// Inicialización
+window.onload = () => { 
+    initTheme(); 
+    fetchBCVRates(); 
+    // Restaurar par guardado
+    const savedPair = localStorage.getItem('dolivar_input_pair');
+    if (savedPair) {
+        inputPair = savedPair;
+        if (inputPair === 'usd-bs') {
+            inputCurrency = 'USD';
+            currencySymbol.textContent = 'US$';
+        } else {
+            inputCurrency = 'EUR';
+            currencySymbol.textContent = '€';
+        }
     }
-});
-
-window.onload = () => { initTheme(); fetchBCVRates(); };
+};
 </script>
 </body>
 </html>
