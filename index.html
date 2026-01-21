@@ -88,6 +88,7 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            cursor: pointer;
         }
 
         .display-area {
@@ -323,6 +324,16 @@
                        class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer">
             </div>
 
+            <!-- Ingreso manual de tasa -->
+            <div class="p-3 bg-black/10 rounded-xl">
+                <div class="flex justify-between items-center mb-2">
+                    <span>💱 Tasa BCV (Bs/$)</span>
+                </div>
+                <input type="number" id="manual-rate" placeholder="Ej: 347.26" 
+                       class="w-full p-2 border rounded-lg bg-white text-black"
+                       oninput="saveManualRate(this.value)">
+            </div>
+
             <div class="p-3 bg-black/10 rounded-xl cursor-pointer" onclick="showHelp()">
                 <span>Ayuda</span>
             </div>
@@ -427,7 +438,8 @@
 <script>
 /* 
  * Dolivar - Calculadora BCV Profesional
- * Última actualización: 05/01/2026
+ * Última actualización: 22/01/2026
+ * Fallback robusto: usa enparalelo.com.ve + entrada manual
  */
 
 let currentInputText = '0';
@@ -454,7 +466,9 @@ const volumeSlider = document.getElementById('volume-slider');
 const vibrationSlider = document.getElementById('vibration-slider');
 const volumeValue = document.getElementById('volume-value');
 const vibrationValue = document.getElementById('vibration-value');
+const manualRateInput = document.getElementById('manual-rate');
 
+// Cargar valores guardados
 if (volumeSlider) {
     volumeSlider.value = Math.round(volumeLevel * 100);
     volumeValue.textContent = Math.round(volumeLevel * 100) + '%';
@@ -464,6 +478,7 @@ if (vibrationSlider) {
     vibrationValue.textContent = vibrationDuration + ' ms';
 }
 
+// Eventos de sliders
 if (vibrationSlider) {
     vibrationSlider.addEventListener('input', () => {
         vibrationDuration = parseInt(vibrationSlider.value);
@@ -481,6 +496,7 @@ if (volumeSlider) {
     });
 }
 
+// Sonido de vista previa
 function playSoundPreview() {
     if (volumeLevel <= 0) return;
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -494,6 +510,7 @@ function playSoundPreview() {
     osc.start(); osc.stop(audioCtx.currentTime + 0.15);
 }
 
+// Función de sonido
 function playSound(type) {
     if (volumeLevel <= 0) return;
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -516,17 +533,20 @@ function playSound(type) {
     oscillator.stop(audioCtx.currentTime + 0.2);
 }
 
+// Función de vibración
 function vibrate() {
     if (vibrationDuration > 0 && navigator.vibrate) {
         navigator.vibrate(vibrationDuration);
     }
 }
 
+// Feedback combinado
 function provideFeedback(type = 'op') {
     vibrate();
     playSound(type);
 }
 
+// Funciones de UI
 function toggleSettings() {
     provideFeedback('op');
     settingsModal.classList.add('active');
@@ -576,33 +596,73 @@ function toggleTheme() {
     }
 }
 
-async function fetchBCVRate() {
-    rateLabel.innerHTML = "Sincronizando...";
-    dateLabel.innerHTML = "";
-    rateLabel.classList.add('loading-pulse');
-    try {
-        // ✅ URL ACTUALIZADA (funciona el 05/01/2026)
-        const response = await fetch("https://api.dolarapi.com/v1/dolares/bcv");
-        const data = await response.json();
-        if (data && data.promedio) {
-            bcvRate = parseFloat(data.promedio);
-            const rateFormatted = bcvRate.toLocaleString('de-DE', {minimumFractionDigits: 2});
-            let fechaObjeto = data.updatedAt ? new Date(data.updatedAt) : new Date();
-            const dia = String(fechaObjeto.getDate()).padStart(2, '0');
-            const mes = String(fechaObjeto.getMonth() + 1).padStart(2, '0');
-            const anio = fechaObjeto.getFullYear();
-            const fechaFinal = `${dia}/${mes}/${anio}`;
-            rateLabel.innerHTML = `BCV: <span class="rate-value">${rateFormatted}</span> <span class="rate-value">Bs/USD</span>`;
-            dateLabel.innerHTML = `TASA ACTUALIZADA AL: ${fechaFinal}`;
-            rateLabel.classList.remove('loading-pulse');
-            updateUI();
-        }
-    } catch (e) { 
-        rateLabel.innerText = "Error de red. Reintentar"; 
+// Guardar tasa manual
+function saveManualRate(value) {
+    if (value && !isNaN(value)) {
+        const rate = parseFloat(value);
+        const now = new Date().toISOString();
+        localStorage.setItem('dolivar_manual_rate', rate.toString());
+        localStorage.setItem('dolivar_manual_date', now);
+        bcvRate = rate;
+        updateUI();
+        rateLabel.innerHTML = `BCV: <span class="rate-value">${rate.toLocaleString('de-DE', {minimumFractionDigits: 2})}</span> <span class="rate-value">Bs/USD</span>`;
+        dateLabel.innerHTML = `TASA INGRESADA MANUALMENTE`;
         rateLabel.classList.remove('loading-pulse');
     }
 }
 
+// Función principal de obtención de tasa
+async function fetchBCVRate() {
+    rateLabel.innerHTML = "Sincronizando...";
+    dateLabel.innerHTML = "";
+    rateLabel.classList.add('loading-pulse');
+    
+    // Intento 1: API de respaldo (enparalelo.com.ve)
+    try {
+        const response = await fetch("https://enparalelo.com.ve/api/tasas.json");
+        if (response.ok) {
+            const data = await response.json();
+            if (data && data.bcv) {
+                const rate = parseFloat(data.bcv.replace(/,/g, '.'));
+                const now = new Date().toISOString();
+                localStorage.setItem('dolivar_last_rate', rate.toString());
+                localStorage.setItem('dolivar_last_date', now);
+                bcvRate = rate;
+                updateUI();
+                rateLabel.innerHTML = `BCV: <span class="rate-value">${rate.toLocaleString('de-DE', {minimumFractionDigits: 2})}</span> <span class="rate-value">Bs/USD</span>`;
+                dateLabel.innerHTML = `TASA ACTUALIZADA AL: ${new Date(now).toLocaleDateString('es-VE')}`;
+                rateLabel.classList.remove('loading-pulse');
+                return;
+            }
+        }
+    } catch (e) {
+        console.warn("API de respaldo falló:", e);
+    }
+
+    // Intento 2: Tasa manual o guardada
+    const lastRate = localStorage.getItem('dolivar_manual_rate') || localStorage.getItem('dolivar_last_rate');
+    const lastDate = localStorage.getItem('dolivar_manual_date') || localStorage.getItem('dolivar_last_date');
+    
+    if (lastRate) {
+        bcvRate = parseFloat(lastRate);
+        updateUI();
+        rateLabel.innerHTML = `BCV: <span class="rate-value">${parseFloat(lastRate).toLocaleString('de-DE', {minimumFractionDigits: 2})}</span> <span class="rate-value">Bs/USD</span>`;
+        if (lastDate) {
+            dateLabel.innerHTML = `ÚLTIMA ACTUALIZACIÓN: ${new Date(lastDate).toLocaleDateString('es-VE')}`;
+        } else {
+            dateLabel.innerHTML = "TASA ANTERIOR";
+        }
+        rateLabel.classList.remove('loading-pulse');
+        return;
+    }
+
+    // Ninguna opción disponible
+    rateLabel.innerText = "⚠️ Sin conexión a tasa BCV";
+    dateLabel.innerText = "Ingresa tasa manualmente en Configuración";
+    rateLabel.classList.remove('loading-pulse');
+}
+
+// Resto de funciones (toggleCurrency, updateUI, etc.)
 function toggleCurrency() {
     provideFeedback('op');
     if (!bcvRate) {
@@ -807,7 +867,15 @@ function clearDisplay() {
     updateUI(); 
 }
 
-window.onload = () => { initTheme(); fetchBCVRate(); };
+window.onload = () => { 
+    initTheme(); 
+    fetchBCVRate(); 
+    // Cargar tasa manual si existe
+    const manualRate = localStorage.getItem('dolivar_manual_rate');
+    if (manualRate) {
+        document.getElementById('manual-rate').value = manualRate;
+    }
+};
 </script>
 </body>
 </html>
