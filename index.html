@@ -213,6 +213,7 @@
             padding-left: 8px;
             margin-left: 8px;
             max-width: calc(100% - 50px);
+            font-size: 1.15rem; /* ✅ Fuente más grande en historial */
         }
         #operation-history::-webkit-scrollbar {
             display: none;
@@ -279,6 +280,37 @@
             background: #7D1935;
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Menú emergente para selector de moneda */
+        #currency-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-modal);
+            color: var(--text-modal);
+            border-radius: 1rem;
+            padding: 0.5rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 60;
+            display: none;
+            width: 140px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        #currency-menu button {
+            display: block;
+            width: 100%;
+            padding: 0.5rem;
+            background: none;
+            border: none;
+            color: var(--text-modal);
+            text-align: center;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+        #currency-menu button:hover {
+            background: rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -349,7 +381,7 @@
             <p class="font-bold mt-3">Guía de Uso</p>
             <ul>
                 <li>🔹 <strong>Conversión en Tiempo Real</strong>: Al introducir un monto, la calculadora muestra automáticamente la equivalencia en las otras monedas basándose en las tasas oficiales.</li>
-                <li>🔹 <strong>Cambio de Moneda</strong>: Toca el botón del selector para alternar entre USD, EUR y Bs.</li>
+                <li>🔹 <strong>Cambio de Moneda</strong>: Mantén presionado el botón del selector durante 2 segundos para alternar entre USD y EUR.</li>
                 <li>🔹 <strong>Jerarquía Matemática</strong>: El sistema procesa primero multiplicaciones/divisiones y luego sumas/restas, garantizando resultados exactos en operaciones complejas.</li>
                 <li>🔹 <strong>Tasas BCV y EUR</strong>: Los datos se sincronizan con APIs oficiales. Puedes forzar una actualización tocando la barra superior.</li>
                 <li>🔹 <strong>Historial</strong>: En la parte superior de la pantalla de visualización, verás la secuencia de tu operación actual.</li>
@@ -362,7 +394,7 @@
     <div id="about-modal" class="about-modal">
         <h3 class="font-bold text-lg mb-3">Acerca de</h3>
         <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.2.5 — 22/01/2026</p>
+            <p class="highlight">DOLIVAR v1.2.6 — 22/01/2026</p>
             <p class="mt-4">Desarrollador Principal</p>
             <p>Magdiel Mendoza</p>
             <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong> y <strong>Gemini AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
@@ -398,8 +430,12 @@
     <div class="grid-buttons">
         <div class="btn btn-clear" onclick="clearDisplay()">AC</div>
         <div class="btn btn-del" onclick="deleteLast()">Del</div>
-        <div class="btn btn-op" onclick="toggleCurrency()" style="font-size: 1.4rem; font-weight: 800;">
+        <div class="btn btn-op relative" id="currency-btn" style="font-size: 1.4rem; font-weight: 800;">
             <span id="currency-symbol">US$</span>
+            <div id="currency-menu">
+                <button data-mode="usd">US$/Bs</button>
+                <button data-mode="eur">Euro/Bs</button>
+            </div>
         </div>
         <div class="btn btn-op" onclick="setOperator('/')">÷</div>
 
@@ -428,7 +464,7 @@
 /* 
  * Dolivar - Calculadora BCV Profesional
  * Última actualización: 22/01/2026
- * v1.2.5: Soporte para Euro (EUR) + fallback a ve.dolarapi.com
+ * v1.2.6: Selector de moneda con long press + corrección de API + historial más legible
  */
 
 let currentInputText = '0';
@@ -436,7 +472,7 @@ let expressionTokens = [];
 let isNewInput = true;
 let bcvRate = null;      // Tasa USD/Bs
 let eurRate = null;      // Tasa EUR/Bs
-let inputCurrency = 'USD'; // 'USD', 'EUR', o 'BS'
+let inputCurrency = 'USD'; // Solo 'USD' o 'EUR'
 let audioCtx = null;
 let lastOperator = null;
 let nextNumberIsMultiplier = false;
@@ -456,6 +492,9 @@ const volumeSlider = document.getElementById('volume-slider');
 const vibrationSlider = document.getElementById('vibration-slider');
 const volumeValue = document.getElementById('volume-value');
 const vibrationValue = document.getElementById('vibration-value');
+const currencyBtn = document.getElementById('currency-btn');
+const currencyMenu = document.getElementById('currency-menu');
+const currencySymbol = document.getElementById('currency-symbol');
 
 if (volumeSlider) {
     volumeSlider.value = Math.round(volumeLevel * 100);
@@ -540,6 +579,7 @@ function closeAllModals() {
     helpModal.classList.remove('active');
     aboutModal.classList.remove('active');
     modalOverlay.classList.remove('active');
+    currencyMenu.style.display = 'none';
 }
 
 function showHelp() {
@@ -578,7 +618,7 @@ function toggleTheme() {
     }
 }
 
-// ✅ Nueva función: obtiene tasas de USD y EUR con fallback
+// ✅ Nueva función: obtiene tasas de USD y EUR con fallback correcto
 async function fetchBCVRates() {
     rateLabel.innerHTML = "Sincronizando tasas...";
     dateLabel.innerHTML = "";
@@ -589,10 +629,10 @@ async function fetchBCVRates() {
         const response1 = await fetch("https://api.dolarvzla.com/public/exchange-rate");
         if (response1.ok) {
             const data1 = await response1.json();
-            if (data1 && data1.actual && typeof data1.actual.usd === 'number' && typeof data1.actual.eur === 'number') {
-                bcvRate = parseFloat(data1.actual.usd);
-                eurRate = parseFloat(data1.actual.eur);
-                saveRatesToStorage(bcvRate, eurRate, data1.actual.fecha);
+            if (data1 && data1.current && typeof data1.current.usd === 'number' && typeof data1.current.eur === 'number') {
+                bcvRate = parseFloat(data1.current.usd);
+                eurRate = parseFloat(data1.current.eur);
+                saveRatesToStorage(bcvRate, eurRate, data1.current.date);
                 displayRates();
                 return;
             }
@@ -601,16 +641,19 @@ async function fetchBCVRates() {
         console.warn("API principal falló:", e1);
     }
 
-    // Intento 2: API de respaldo (ve.dolarapi.com)
+    // Intento 2: API de respaldo (ve.dolarapi.com) — solo para USD
     try {
-        const response2 = await fetch("https://ve.dolarapi.com/v1/dolares/oficial");
+        const response2 = await fetch("https://ve.dolarapi.com/v1/dolares");
         if (response2.ok) {
             const data2 = await response2.json();
-            if (data2 && data2.promedio) {
-                bcvRate = parseFloat(data2.promedio);
-                // Para EUR, usamos una proporción aproximada (si no hay dato real)
-                eurRate = bcvRate * 1.17; // Ajuste estimado
-                saveRatesToStorage(bcvRate, eurRate, new Date().toISOString());
+            const oficial = data2.find(d => d.nombre?.toLowerCase().includes('oficial'));
+            if (oficial && oficial.promedio) {
+                bcvRate = parseFloat(oficial.promedio);
+                // No hay EUR en esta API → mantener eurRate anterior si existe, o usar proporción
+                if (!eurRate) {
+                    eurRate = bcvRate * 1.17; // estimación conservadora
+                }
+                saveRatesToStorage(bcvRate, eurRate, new Date().toISOString().split('T')[0]);
                 displayRates();
                 return;
             }
@@ -661,31 +704,64 @@ function displayRates() {
     updateUI();
 }
 
-// ✅ Nuevo selector: USD ↔ EUR
-function toggleCurrency() {
+// ✅ Nuevo selector con long press
+let longPressTimer = null;
+
+currencyBtn.addEventListener('mousedown', startLongPress);
+currencyBtn.addEventListener('mouseup', endLongPress);
+currencyBtn.addEventListener('mouseleave', endLongPress);
+currencyBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startLongPress(); });
+currencyBtn.addEventListener('touchend', endLongPress);
+
+function startLongPress() {
+    longPressTimer = setTimeout(() => {
+        currencyMenu.style.display = 'block';
+    }, 2000);
+}
+
+function endLongPress() {
+    clearTimeout(longPressTimer);
+}
+
+// Selección en menú
+currencyMenu.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const newMode = btn.dataset.mode;
+        setCurrencyMode(newMode);
+        currencyMenu.style.display = 'none';
+    });
+});
+
+function setCurrencyMode(mode) {
     provideFeedback('op');
     if (!bcvRate || !eurRate) {
         alert("⚠️ Primero sincroniza las tasas.");
         return;
     }
 
-    const currencySymbol = document.getElementById('currency-symbol');
-    let currentVal = parseFloat(currentInputText) || 0;
+    let currentVal = parseFloat(currentInputText.replace(/,/g, '')) || 0;
 
-    if (inputCurrency === 'USD') {
-        inputCurrency = 'EUR';
-        currentInputText = (currentVal * bcvRate / eurRate).toFixed(2);
-        currencySymbol.textContent = '€';
-    } else if (inputCurrency === 'EUR') {
-        inputCurrency = 'BS';
-        currentInputText = (currentVal * eurRate).toFixed(2);
-        currencySymbol.textContent = 'Bs';
-    } else { // BS
+    if (mode === 'usd' && inputCurrency !== 'USD') {
+        // Convertir desde EUR o BS a USD
+        if (inputCurrency === 'EUR') {
+            currentVal = currentVal * eurRate / bcvRate;
+        } else { // BS
+            currentVal = currentVal / bcvRate;
+        }
         inputCurrency = 'USD';
-        currentInputText = (currentVal / bcvRate).toFixed(2);
         currencySymbol.textContent = 'US$';
+    } else if (mode === 'eur' && inputCurrency !== 'EUR') {
+        // Convertir desde USD o BS a EUR
+        if (inputCurrency === 'USD') {
+            currentVal = currentVal * bcvRate / eurRate;
+        } else { // BS
+            currentVal = currentVal / eurRate;
+        }
+        inputCurrency = 'EUR';
+        currencySymbol.textContent = '€';
     }
 
+    currentInputText = currentVal.toFixed(2);
     if (currentInputText.endsWith('.00')) {
         currentInputText = parseInt(parseFloat(currentInputText)).toString();
     }
@@ -701,8 +777,6 @@ function updateUI() {
         prefix = '$ ';
     } else if (inputCurrency === 'EUR') {
         prefix = '€ ';
-    } else {
-        prefix = 'Bs. ';
     }
 
     let displayVal = currentInputText;
@@ -727,8 +801,6 @@ function updateUI() {
             convertedText = `Bs. ${(val * bcvRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} | € ${(val * bcvRate / eurRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         } else if (inputCurrency === 'EUR') {
             convertedText = `Bs. ${(val * eurRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} | $ ${(val * eurRate / bcvRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        } else { // BS
-            convertedText = `$ ${(val / bcvRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} | € ${(val / eurRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
     } else {
         convertedText = "Tasa no disponible";
@@ -757,7 +829,7 @@ function updateHistory() {
         if (nextNumberIsMultiplier) {
             displayParts.push(currentInputText);
         } else {
-            const prefix = inputCurrency === 'USD' ? '$' : inputCurrency === 'EUR' ? '€' : 'Bs';
+            const prefix = inputCurrency === 'USD' ? '$' : '€';
             displayParts.push(prefix + currentInputText);
         }
     }
@@ -857,8 +929,6 @@ function calc() {
         currentInputText = resultUSD.toFixed(2);
     } else if (inputCurrency === 'EUR') {
         currentInputText = (resultUSD * bcvRate / eurRate).toFixed(2);
-    } else {
-        currentInputText = (resultUSD * bcvRate).toFixed(2);
     }
     
     if (currentInputText.endsWith('.00')) {
@@ -880,6 +950,13 @@ function clearDisplay() {
     isNewInput = true;
     updateUI(); 
 }
+
+// Cerrar menú si se hace clic fuera
+document.addEventListener('click', (e) => {
+    if (!currencyBtn.contains(e.target) && !currencyMenu.contains(e.target)) {
+        currencyMenu.style.display = 'none';
+    }
+});
 
 window.onload = () => { initTheme(); fetchBCVRates(); };
 </script>
