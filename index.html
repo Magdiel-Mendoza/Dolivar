@@ -592,60 +592,69 @@ function toggleTheme() {
 
 // ✅ Obtención de tasas (USD + EUR)
 async function fetchBCVRates() {
-    rateLabel.innerHTML = "Sincronizando tasas...";
-    dateLabel.innerHTML = "";
-    rateLabel.classList.add('loading-pulse');
-    
-    // Intento 1: API principal
-    try {
-        const response1 = await fetch("https://api.dolarvzla.com/public/exchange-rate");
-        if (response1.ok) {
-            const data1 = await response1.json();
-            if (data1 && data1.current && typeof data1.current.usd === 'number' && typeof data1.current.eur === 'number') {
-                bcvRate = parseFloat(data1.current.usd);
-                eurRate = parseFloat(data1.current.eur);
-                saveRatesToStorage(bcvRate, eurRate, data1.current.date);
-                displayRates();
-                return;
-            }
-        }
-    } catch (e1) {
-        console.warn("API principal falló:", e1);
-    }
+  rateLabel.innerHTML = "Sincronizando tasas...";
+  dateLabel.innerHTML = "";
+  rateLabel.classList.add('loading-pulse');
 
-    // Intento 2: API de respaldo (solo USD)
-    try {
-        const response2 = await fetch("https://ve.dolarapi.com/v1/dolares");
-        if (response2.ok) {
-            const data2 = await response2.json();
-            const oficial = data2.find(d => d.nombre?.toLowerCase().includes('oficial'));
-            if (oficial && oficial.promedio) {
-                bcvRate = parseFloat(oficial.promedio);
-                if (!eurRate) eurRate = bcvRate * 1.17;
-                saveRatesToStorage(bcvRate, eurRate, new Date().toISOString().split('T')[0]);
-                displayRates();
-                return;
-            }
-        }
-    } catch (e2) {
-        console.warn("API de respaldo falló:", e2);
-    }
-
-    // Intento 3: usar últimas guardadas
-    const lastUSD = localStorage.getItem('dolivar_last_usd_rate');
-    const lastEUR = localStorage.getItem('dolivar_last_eur_rate');
-    if (lastUSD && lastEUR) {
-        bcvRate = parseFloat(lastUSD);
-        eurRate = parseFloat(lastEUR);
-        updateUI();
-        rateLabel.innerHTML = `TASAS ANTERIORES`;
-        dateLabel.innerHTML = "Última actualización guardada";
-        rateLabel.classList.remove('loading-pulse');
+  // Intento 1: ve.dolarapi.com (más fiel al BCV)
+  try {
+    const response1 = await fetch("https://ve.dolarapi.com/v1/dolares");
+    if (response1.ok) {
+      const data1 = await response1.json();
+      const oficial = data1.find(d => d.nombre?.toLowerCase().includes('oficial'));
+      const euro = data1.find(d => d.nombre?.toLowerCase().includes('euro'));
+      if (oficial && oficial.promedio) {
+        bcvRate = parseFloat(oficial.promedio);
+        eurRate = euro && euro.promedio ? parseFloat(euro.promedio) : bcvRate * 1.19;
+        const fechaAPI = oficial.fechaActualizacion
+          ? oficial.fechaActualizacion.split('T')[0]
+          : new Date().toISOString().split('T')[0];
+        saveRatesToStorage(bcvRate, eurRate, fechaAPI);
+        displayRates();
         return;
+      }
     }
+  } catch (e1) {
+    console.warn("API principal falló:", e1);
+  }
 
-    rateLabel.innerText = "⚠️ Error de red. Reintentar";
+  // Intento 2: dolarvzla.com como respaldo
+  try {
+    const response2 = await fetch("https://api.dolarvzla.com/public/exchange-rate");
+    if (response2.ok) {
+      const data2 = await response2.json();
+      if (data2 && data2.current && typeof data2.current.usd === 'number') {
+        bcvRate = parseFloat(data2.current.usd);
+        eurRate = typeof data2.current.eur === 'number' ? parseFloat(data2.current.eur) : bcvRate * 1.19;
+        saveRatesToStorage(bcvRate, eurRate, data2.current.date || new Date().toISOString().split('T')[0]);
+        displayRates();
+        return;
+      }
+    }
+  } catch (e2) {
+    console.warn("API de respaldo falló:", e2);
+  }
+
+  // Intento 3: usar últimas guardadas (solo si tienen menos de 48 horas)
+  const lastUSD = localStorage.getItem('dolivar_last_usd_rate');
+  const lastEUR = localStorage.getItem('dolivar_last_eur_rate');
+  const lastDate = localStorage.getItem('dolivar_last_date');
+  const horasTranscurridas = lastDate
+    ? (Date.now() - new Date(lastDate).getTime()) / 36e5
+    : 999;
+
+  if (lastUSD && lastEUR && horasTranscurridas < 48) {
+    bcvRate = parseFloat(lastUSD);
+    eurRate = parseFloat(lastEUR);
+    updateUI();
+    rateLabel.innerHTML = `TASAS ANTERIORES`;
+    dateLabel.innerHTML = `Cache de hace ${Math.round(horasTranscurridas)}h — toca para actualizar`;
     rateLabel.classList.remove('loading-pulse');
+    return;
+  }
+
+  rateLabel.innerText = "⚠️ Error de red. Toca para reintentar";
+  rateLabel.classList.remove('loading-pulse');
 }
 
 function saveRatesToStorage(usd, eur, date) {
