@@ -605,8 +605,8 @@ async function fetchBCVRates() {
       const data = await response.json();
       const html = data.contents;
 
-const usdMatch = html.match(/id="dolar"[\s\S]{0,300}?centrado">\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
-const eurMatch = html.match(/id="euro"[\s\S]{0,300}?centrado">\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
+const usdMatch = html.match(/id="dolar"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
+const eurMatch = html.match(/id="euro"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
 
       if (usdMatch && eurMatch) {
         bcvRate = parseFloat(usdMatch[1].replace(/\./g, '').replace(',', '.'));
