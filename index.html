@@ -599,11 +599,10 @@ async function fetchBCVRates() {
   // Intento 1: scraping directo del BCV via proxy CORS
   try {
     const response = await fetch(
-      "https://api.allorigins.win/get?url=" + encodeURIComponent("https://www.bcv.org.ve/")
+      "https://corsproxy.io/?url=" + encodeURIComponent("https://www.bcv.org.ve/")
     );
     if (response.ok) {
-      const data = await response.json();
-      const html = data.contents;
+      const html = await response.text();
 
 const usdMatch = html.match(/id="dolar"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
 const eurMatch = html.match(/id="euro"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
