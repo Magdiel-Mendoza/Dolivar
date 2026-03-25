@@ -15,7 +15,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <!-- Ícono PWA -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMxZTI5M2IiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2Y4ZmFmYyIgZm9udC1zaXplPSIxMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiPlVTJMKgL0JzPC90ZXh0Pjwvc3ZnPg==">
+    <link rel="apple-touch-icon" href="image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMxZTI5M2IiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2Y4ZmFmYyIgZm9udC1zaXplPSIxMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiPlVTJMKgL0JzPC90ZXh0Pjwvc3ZnPg==">
 
     <!-- ✅ Manifest físico (NO en base64) -->
     <link rel="manifest" href="manifest.json">
@@ -368,7 +368,7 @@
     <div id="about-modal" class="about-modal">
         <h3 class="font-bold text-lg mb-3">Acerca de</h3>
         <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.2.7 — 25/03/2026</p>
+            <p class="highlight">DOLIVAR v1.2.8 — 25/03/2026</p>
             <p class="mt-4">Desarrollador Principal</p>
             <p>Magdiel Mendoza</p>
             <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong> y <strong>Gemini AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
@@ -377,7 +377,7 @@
         <button class="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold" onclick="closeAllModals()">Cerrar</button>
     </div>
 
-    <div class="rate-top-bar transition-colors" onclick="fetchBCVRates()">
+    <div class="rate-top-bar transition-colors" onclick="fetchBCVRates()" title="Toca para actualizar tasas">
         <span id="rate-label" class="loading-pulse uppercase tracking-[0.05em] text-slate-100 font-bold">
             Sincronizando tasas...
         </span>
@@ -434,7 +434,7 @@
 /* 
  * Dolivar - Calculadora BCV Profesional
  * Última actualización: 25/03/2026
- * v1.2.7: Lógica de fecha efectiva venezolana + Calendario bancario 2025
+ * v1.2.8: Lógica EUR calculada + Mensajes amigables + Indicador dev 🔍
  */
 
 let currentInputText = '0';
@@ -588,7 +588,7 @@ function toggleTheme() {
 }
 
 // ============================================================================
-// 🇻🇪 LÓGICA DE FECHA EFECTIVA PARA TASAS BCV (Reglas venezolanas)
+// 🇻🇪 LÓGICA DE FECHA EFECTIVA PARA TASAS BCV
 // ============================================================================
 
 function getEffectiveRateDate(now = null) {
@@ -647,7 +647,10 @@ function formatDateVE(dateStr) {
   return `${d}/${m}/${y}`;
 }
 
-// ✅ Obtención de tasas con lógica de fecha efectiva venezolana
+// ============================================================================
+// 💱 OBTENCIÓN DE TASAS CON LÓGICA EUR CALCULADA
+// ============================================================================
+
 async function fetchBCVRates() {
   if (navigator.vibrate && vibrationDuration > 0) navigator.vibrate(30);
   
@@ -657,9 +660,22 @@ async function fetchBCVRates() {
 
   const fechaEfectiva = getEffectiveRateDate();
   const fechaActual = new Date().toISOString().split('T')[0];
+  const horaVE = new Date().toLocaleString("en-US", {timeZone: "America/Caracas", hour: "numeric", hour12: false});
   const esMismaFecha = (fechaEfectiva === fechaActual);
   
-  // Intento 1: API histórica de RafnixG
+  // ✅ CAPA 1: Cache válido (menos de 24h y fecha correcta)
+  const cacheUSD = localStorage.getItem('dolivar_last_usd_rate');
+  const cacheEUR = localStorage.getItem('dolivar_last_eur_rate');
+  const cacheDate = localStorage.getItem('dolivar_last_date');
+  
+  if (cacheUSD && cacheEUR && cacheDate === fechaEfectiva) {
+    bcvRate = parseFloat(cacheUSD);
+    eurRate = parseFloat(cacheEUR);
+    displayRates(fechaEfectiva, 'cache');
+    return;
+  }
+  
+  // ✅ CAPA 2: Obtener USD de RafnixG + calcular EUR
   try {
     const endpoint = esMismaFecha 
       ? 'https://bcv-api.rafnixg.dev/rates/'
@@ -669,94 +685,88 @@ async function fetchBCVRates() {
     if (response.ok) {
       const data = await response.json();
       
-      if (data.dolar?.venta && data.euro?.venta) {
+      if (data.dolar?.venta) {
         bcvRate = parseFloat(data.dolar.venta);
-        eurRate = parseFloat(data.euro.venta);
+        eurRate = await calcularEURDesdeUSD(bcvRate, fechaEfectiva);
         
         saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
-        displayRates(fechaEfectiva, esMismaFecha ? 'BCV oficial' : 'BCV histórico');
+        displayRates(fechaEfectiva, 'api');
         return;
       }
     }
   } catch (e1) {
-    console.warn("API RafnixG falló:", e1);
+    console.warn("🔍 RafnixG:", e1);
   }
-
-  // Intento 2: Scraping directo del BCV via proxy CORS
-  try {
-    const response = await fetch(
-      "https://corsproxy.io/?url=" + encodeURIComponent("https://www.bcv.org.ve/")
-    );
-    if (response.ok) {
-      const html = await response.text();
-      const usdMatch = html.match(/id="dolar"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
-      const eurMatch = html.match(/id="euro"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
-
-      if (usdMatch && eurMatch) {
-        bcvRate = parseFloat(usdMatch[1].replace(/\./g, '').replace(',', '.'));
-        eurRate = parseFloat(eurMatch[1].replace(/\./g, '').replace(',', '.'));
-        
-        const cacheDate = localStorage.getItem('dolivar_last_date');
-        if (cacheDate && cacheDate === fechaEfectiva) {
-          displayRates(cacheDate, 'BCV scraping (validado)');
-          return;
-        }
-        
-        saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
-        displayRates(fechaEfectiva, 'BCV scraping');
-        return;
-      }
-    }
-  } catch (e2) {
-    console.warn("Scraping BCV falló:", e2);
-  }
-
-  // Intento 3: ve.dolarapi.com como respaldo
-  try {
-    const response2 = await fetch("https://ve.dolarapi.com/v1/dolares");
-    if (response2.ok) {
-      const data2 = await response2.json();
-      const oficial = data2.find(d => d.fuente === 'oficial');
-      if (oficial && oficial.promedio) {
-        bcvRate = parseFloat(oficial.promedio);
-        eurRate = bcvRate * 1.16;
-        
-        const apiDate = oficial.fechaActualizacion?.split('T')[0];
-        if (apiDate && apiDate === fechaEfectiva) {
-          saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
-          displayRates(fechaEfectiva, 'DolarAPI respaldo');
-          return;
-        }
-      }
-    }
-  } catch (e3) {
-    console.warn("API de respaldo falló:", e3);
-  }
-
-  // Intento 4: Caché local con validación de fecha efectiva
-  const lastUSD = localStorage.getItem('dolivar_last_usd_rate');
-  const lastEUR = localStorage.getItem('dolivar_last_eur_rate');
-  const lastDate = localStorage.getItem('dolivar_last_date');
   
-  if (lastUSD && lastEUR && lastDate === fechaEfectiva) {
-    bcvRate = parseFloat(lastUSD);
-    eurRate = parseFloat(lastEUR);
+  // ✅ CAPA 3: Scraping BCV (solo antes de 4 PM para EUR seguro)
+  if (horaVE < 16) {
+    try {
+      const response = await fetch(
+        "https://corsproxy.io/?url=" + encodeURIComponent("https://www.bcv.org.ve/")
+      );
+      if (response.ok) {
+        const html = await response.text();
+        const usdMatch = html.match(/id="dolar"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
+        const eurMatch = html.match(/id="euro"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
+
+        if (usdMatch && eurMatch) {
+          bcvRate = parseFloat(usdMatch[1].replace(/\./g, '').replace(',', '.'));
+          eurRate = parseFloat(eurMatch[1].replace(/\./g, '').replace(',', '.'));
+          
+          saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
+          displayRates(fechaEfectiva, 'bcv');
+          return;
+        }
+      }
+    } catch (e2) {
+      console.warn("🔍 Scraping:", e2);
+    }
+  }
+  
+  // ✅ CAPA 4: Fallback a cache antiguo
+  if (cacheUSD && cacheEUR && cacheDate) {
+    bcvRate = parseFloat(cacheUSD);
+    eurRate = parseFloat(cacheEUR);
     updateUI();
     rateLabel.innerHTML = `USD: <span class="rate-value">${bcvRate.toLocaleString('de-DE', {minimumFractionDigits: 2})}</span> | EUR: <span class="rate-value">${eurRate.toLocaleString('de-DE', {minimumFractionDigits: 2})}</span> Bs`;
-    dateLabel.innerHTML = `TASAS EN CACHÉ — Vigentes desde ${formatDateVE(lastDate)} 12:00 PM`;
+    dateLabel.innerHTML = `⚠️ Datos del ${formatDateVE(cacheDate)} — Toca para actualizar`;
     rateLabel.classList.remove('loading-pulse');
     return;
   }
-
-  rateLabel.innerHTML = "⚠️ Sin conexión. Toca para reintentar";
-  dateLabel.innerHTML = lastDate ? `Última: ${formatDateVE(lastDate)}` : '';
-  rateLabel.classList.remove('loading-pulse');
   
-  if (lastUSD && lastEUR && lastDate) {
-    bcvRate = parseFloat(lastUSD);
-    eurRate = parseFloat(lastEUR);
-    updateUI();
+  // ❌ Error final
+  rateLabel.innerHTML = "⚠️ Sin conexión. Toca para reintentar";
+  dateLabel.innerHTML = '';
+  rateLabel.classList.remove('loading-pulse');
+}
+
+/**
+ * Calcula EUR basado en USD del BCV + ratio EUR/USD internacional
+ * 🔍 Indicador dev: fuente = 'ratio' en consola
+ */
+async function calcularEURDesdeUSD(usdBCV, fecha) {
+  try {
+    const response = await fetch(
+      `https://api.exchangerate.host/${fecha}?base=USD&symbols=EUR`
+    );
+    
+    if (response.ok) {
+      const data = await response.json();
+      const ratioEURUSD = data.rates.EUR;
+      
+      if (ratioEURUSD && ratioEURUSD > 0) {
+        const eurBCV = usdBCV / ratioEURUSD;
+        console.log(`🔍 EUR calculado: ${usdBCV} / ${ratioEURUSD} = ${eurBCV.toFixed(2)} [fuente: ratio]`);
+        return eurBCV;
+      }
+    }
+  } catch (e) {
+    console.warn("🔍 Ratio EUR/USD no disponible, usando fallback:", e);
   }
+  
+  // Fallback: ratio fijo aproximado
+  console.log(`🔍 EUR fallback: ${usdBCV} × 1.16 = ${(usdBCV * 1.16).toFixed(2)} [fuente: fallback]`);
+  return usdBCV * 1.16;
 }
 
 function saveRatesToStorage(usd, eur, date) {
@@ -765,7 +775,7 @@ function saveRatesToStorage(usd, eur, date) {
     localStorage.setItem('dolivar_last_date', date);
 }
 
-function displayRates(fechaUsada = null, fuente = 'BCV oficial') {
+function displayRates(fechaUsada = null, fuente = 'api') {
     if (!bcvRate || !eurRate) return;
     
     const usdFormatted = bcvRate.toLocaleString('de-DE', {minimumFractionDigits: 2});
@@ -775,12 +785,25 @@ function displayRates(fechaUsada = null, fuente = 'BCV oficial') {
     const dateStr = fechaUsada || localStorage.getItem('dolivar_last_date') || new Date().toISOString();
     const fechaFinal = formatDateVE(dateStr);
     
+    // Mensaje amigable para usuario
     const hoy = new Date().toISOString().split('T')[0];
     const mensajeVigencia = (dateStr === hoy) 
-      ? `TASAS ACTUALIZADAS HOY ${fechaFinal} 12:00 PM`
-      : `TASA VIGENTE DESDE ${fechaFinal} 12:00 PM`;
+      ? `Tasa vigente para Hoy: ${fechaFinal} - BCV`
+      : `Tasa vigente desde: ${fechaFinal} - BCV`;
     
-    dateLabel.innerHTML = `${mensajeVigencia} • ${fuente}`;
+    // 🔍 Indicador discreto para desarrollador (tooltip al tocar)
+    const indicadores = {
+      'api': '🟢',    // RafnixG + ratio
+      'bcv': '🔵',    // Scraping directo
+      'cache': '🟡',  // Cache local
+      'fallback': '🟠' // Ratio fijo
+    };
+    const indicator = indicadores[fuente] || '⚪';
+    
+    dateLabel.innerHTML = `${mensajeVigencia} <span title="Fuente: ${fuente}">${indicator}</span>`;
+    
+    // 🔍 Log para supervisión de Magdiel
+    console.log(`🔍 Tasas cargadas: USD=${bcvRate}, EUR=${eurRate}, Fecha=${dateStr}, Fuente=${fuente}`);
     
     rateLabel.classList.remove('loading-pulse');
     updateUI();
