@@ -87,48 +87,140 @@
             cursor: pointer;
             user-select: none;
             transition: background 0.2s;
-            min-width: 0;
-            overflow: hidden;
         }
         
         .rate-top-bar:active {
             background: rgba(15, 23, 42, 0.5);
         }
 
-        #rate-label { 
-            cursor: pointer; 
-            font-size: 15px; 
-            display: block;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
-            line-height: 1.4;
-            white-space: normal;
-            word-break: break-word;
-        }
-        
-        #date-label { 
-            font-size: 12px; 
-            color: #94a3b8; 
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
-            line-height: 1.4;
-            white-space: nowrap;
+        .display-area {
+            background-color: var(--bg-display);
+            border-radius: 1.75rem;
+            padding: 1.1rem 1.3rem;
+            margin-bottom: 1.2rem;
+            text-align: right;
+            color: white;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
             overflow: hidden;
-            text-overflow: ellipsis;
+        }
+
+        .btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 64px;
+            border-radius: 1.15rem;
+            font-size: 1.45rem;
+            font-weight: 700;
+            transition: all 0.1s ease;
+            cursor: pointer;
+            user-select: none;
+            border-bottom: 3px solid var(--border-btn);
+        }
+
+        .btn:active { transform: translateY(2px); border-bottom-width: 1px; }
+
+        .btn-number { background-color: var(--bg-btn-num); color: var(--text-btn-num); }
+        .btn-op { background-color: var(--bg-btn-op); color: var(--text-btn-op); }
+        .btn-eq { background-color: #2563eb; color: #ffffff; border-bottom-color: #1d4ed8; }
+        .btn-clear { background-color: #be123c; color: #ffffff; border-bottom-color: #881337; }
+        .btn-del { background-color: #f59e0b; color: #ffffff; border-bottom-color: #b45309; }
+
+        .btn-op, .btn-eq {
+            border-bottom: 4px solid var(--border-btn);
+            font-weight: 800;
+        }
+        .btn-op:active, .btn-eq:active {
+            transform: translateY(3px);
+            border-bottom-width: 1px;
+        }
+
+        .dark-mode .btn-op,
+        .dark-mode .btn-eq {
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .control-icon {
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            width: 100%;
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .control-icon:hover { color: #f1f5f9; background: rgba(255, 255, 255, 0.2); }
+        .control-icon svg { width: 20px; height: 20px; display: block; }
+
+        .settings-modal, .help-modal, .about-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 80%;
+            background: var(--bg-modal);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 50;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-modal);
+            text-align: center;
+        }
+        .settings-modal.active, .help-modal.active, .about-modal.active {
+            display: block;
+            animation: modalIn 0.2s forwards;
+        }
+        
+        @keyframes modalIn {
+            to { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            border-radius: 2.5rem;
+            display: none;
+            z-index: 40;
+        }
+        .modal-overlay.active { display: block; }
+
+        #rate-label { 
+            cursor: pointer; 
+            font-size: 16px; 
+            display: block;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            line-height: 1.4;
+        }
+        
+        #date-label { 
+            font-size: 13px; 
+            color: #94a3b8; 
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1.3;
         }
         
         .rate-value { 
             color: #60a5fa; 
             font-weight: 900;
             font-size: 1.08em;
-            display: inline;
         }
         
         .loading-pulse { animation: pulse 2s infinite; }
@@ -297,7 +389,7 @@
     <div id="about-modal" class="about-modal">
         <h3 class="font-bold text-lg mb-3">Acerca de</h3>
         <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.2.8e — 27/03/2026</p>
+            <p class="highlight">DOLIVAR v1.2.8d — 26/03/2026</p>
             <p class="mt-4">Desarrollador Principal</p>
             <p>Magdiel Mendoza</p>
             <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong> y <strong>Gemini AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
@@ -362,7 +454,7 @@
 <script>
 /* 
  * Dolivar - Calculadora BCV Profesional
- * v1.2.8e: Modal corregido + CSS optimizado
+ * v1.2.8d: API primero, cache solo como fallback
  */
 
 let currentInputText = '0';
@@ -602,17 +694,7 @@ async function fetchBCVRates(forzar = false) {
   
   console.log(`🔍 [DEBUG] Fecha efectiva: ${fechaEfectiva} | Hora VE: ${horaVE}`);
   
-  const cacheUSD = localStorage.getItem('dolivar_last_usd_rate');
-  const cacheEUR = localStorage.getItem('dolivar_last_eur_rate');
-  const cacheDate = localStorage.getItem('dolivar_last_date');
-  
-  if (!forzar && cacheUSD && cacheEUR && cacheDate === fechaEfectiva) {
-    bcvRate = parseFloat(cacheUSD);
-    eurRate = parseFloat(cacheEUR);
-    displayRates(fechaEfectiva, 'cache');
-    return;
-  }
-  
+  // ✅ CAPA 1: API SIEMPRE PRIMERO (no cache)
   try {
     const endpoint = esMismaFecha 
       ? 'https://bcv-api.rafnixg.dev/rates/'
@@ -651,12 +733,13 @@ async function fetchBCVRates(forzar = false) {
       
       saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
       displayRates(fechaEfectiva, 'api');
-      return;
+      return; // ✅ Éxito, no usar cache
     }
   } catch (e1) {
     console.warn("🔍 API falló, usando cache como fallback:", e1);
   }
   
+  // ✅ CAPA 2: Scraping BCV (solo antes de 4 PM)
   if (horaVE < 16) {
     try {
       const response = await fetch(
@@ -681,6 +764,11 @@ async function fetchBCVRates(forzar = false) {
     }
   }
   
+  // ✅ CAPA 3: Cache SOLO como último recurso
+  const cacheUSD = localStorage.getItem('dolivar_last_usd_rate');
+  const cacheEUR = localStorage.getItem('dolivar_last_eur_rate');
+  const cacheDate = localStorage.getItem('dolivar_last_date');
+  
   if (cacheUSD && cacheEUR && cacheDate) {
     bcvRate = parseFloat(cacheUSD);
     eurRate = parseFloat(cacheEUR);
@@ -692,6 +780,7 @@ async function fetchBCVRates(forzar = false) {
     return;
   }
   
+  // ❌ Error total
   rateLabel.innerHTML = "⚠️ Sin conexión";
   dateLabel.innerHTML = 'Toque largo para reintentar';
   rateLabel.classList.remove('loading-pulse');
@@ -751,7 +840,7 @@ function displayRates(fechaUsada = null, fuente = 'api') {
     };
     const indicator = indicadores[fuente] || '⚪';
     
-    dateLabel.innerHTML = `${mensajeVigencia} ${indicator}`;
+    dateLabel.innerHTML = `${mensajeVigencia} <span title="Fuente: ${fuente}">${indicator}</span>`;
     
     console.log(`🔍 Tasas: USD=${bcvRate}, EUR=${eurRate}, Fecha=${dateStr}, Fuente=${fuente}`);
     
@@ -1034,9 +1123,10 @@ function clearDisplay() {
     updateUI(); 
 }
 
+// ✅ AL ABRIR: SIEMPRE CONSULTA API (no cache)
 window.onload = () => { 
     initTheme(); 
-    fetchBCVRates(); 
+    fetchBCVRates(false); // false = no forzar, pero igual consulta API primero
     const savedPair = localStorage.getItem('dolivar_input_pair');
     if (savedPair) {
         inputPair = savedPair;
