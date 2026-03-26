@@ -74,7 +74,6 @@
             flex-direction: column;
         }
 
-        /* ✅ BARRA DE TASAS - CSS CORREGIDO PARA ANDROID WEBVIEW */
         .rate-top-bar {
             text-align: center;
             margin-bottom: 0.8rem;
@@ -298,7 +297,7 @@
     <div id="about-modal" class="about-modal">
         <h3 class="font-bold text-lg mb-3">Acerca de</h3>
         <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.2.8d — 27/03/2026</p>
+            <p class="highlight">DOLIVAR v1.2.8e — 27/03/2026</p>
             <p class="mt-4">Desarrollador Principal</p>
             <p>Magdiel Mendoza</p>
             <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong> y <strong>Gemini AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
@@ -363,8 +362,7 @@
 <script>
 /* 
  * Dolivar - Calculadora BCV Profesional
- * v1.2.8d: Lógica EUR calculada + Mensajes amigables + Indicador dev 🔍
- * v1.2.8e: CSS corregido para Android WebView (emoji en misma línea)
+ * v1.2.8e: Modal corregido + CSS optimizado
  */
 
 let currentInputText = '0';
@@ -753,7 +751,6 @@ function displayRates(fechaUsada = null, fuente = 'api') {
     };
     const indicator = indicadores[fuente] || '⚪';
     
-    // ✅ Emoji pegado al texto, sin salto de línea
     dateLabel.innerHTML = `${mensajeVigencia} ${indicator}`;
     
     console.log(`🔍 Tasas: USD=${bcvRate}, EUR=${eurRate}, Fecha=${dateStr}, Fuente=${fuente}`);
