@@ -389,7 +389,7 @@
     <div id="about-modal" class="about-modal">
         <h3 class="font-bold text-lg mb-3">Acerca de</h3>
         <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.2.8c — 26/03/2026</p>
+            <p class="highlight">DOLIVAR v1.2.8d — 26/03/2026</p>
             <p class="mt-4">Desarrollador Principal</p>
             <p>Magdiel Mendoza</p>
             <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong> y <strong>Gemini AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
@@ -398,7 +398,6 @@
         <button class="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold" onclick="closeAllModals()">Cerrar</button>
     </div>
 
-    <!-- ✅ BARRA DE TASAS CON TOQUE LARGO PARA FORZAR ACTUALIZACIÓN -->
     <div class="rate-top-bar transition-colors" onclick="fetchBCVRates()" onmousedown="startLongPress()" onmouseup="cancelLongPress()" ontouchstart="startLongPress()" ontouchend="cancelLongPress()" title="Toque para actualizar | Mantenga 3s para forzar">
         <span id="rate-label" class="loading-pulse uppercase tracking-[0.05em] text-slate-100 font-bold">
             Sincronizando tasas...
@@ -455,7 +454,7 @@
 <script>
 /* 
  * Dolivar - Calculadora BCV Profesional
- * v1.2.8c: Mensaje de vigencia claro + Actualización forzada (3s)
+ * v1.2.8d: API primero, cache solo como fallback
  */
 
 let currentInputText = '0';
@@ -470,8 +469,6 @@ let lastOperator = null;
 let nextNumberIsMultiplier = false;
 let volumeLevel = parseFloat(localStorage.getItem('dolivar_volume') || '1.0');
 let vibrationDuration = parseInt(localStorage.getItem('dolivar_vibration') || '100');
-
-// ✅ Variable para toque largo
 let longPressTimer = null;
 
 const mainDisplay = document.getElementById('main-display');
@@ -671,18 +668,17 @@ function formatDateVE(dateStr) {
 }
 
 // ============================================================================
-// 💱 OBTENCIÓN DE TASAS
+// 💱 OBTENCIÓN DE TASAS - API PRIMERO, CACHE SOLO FALLBACK
 // ============================================================================
 
 async function fetchBCVRates(forzar = false) {
   if (navigator.vibrate && vibrationDuration > 0) navigator.vibrate(30);
   
-  // ✅ Si es forzado, limpiar cache primero
   if (forzar) {
     localStorage.removeItem('dolivar_last_usd_rate');
     localStorage.removeItem('dolivar_last_eur_rate');
     localStorage.removeItem('dolivar_last_date');
-    rateLabel.innerHTML = "FORZANDO ACTUALIZACIÓN...";
+    rateLabel.innerHTML = "FORZANDO...";
     console.log("🔍 [FORZAR] Cache limpiado");
   } else {
     rateLabel.innerHTML = "Sincronizando...";
@@ -698,23 +694,13 @@ async function fetchBCVRates(forzar = false) {
   
   console.log(`🔍 [DEBUG] Fecha efectiva: ${fechaEfectiva} | Hora VE: ${horaVE}`);
   
-  const cacheUSD = localStorage.getItem('dolivar_last_usd_rate');
-  const cacheEUR = localStorage.getItem('dolivar_last_eur_rate');
-  const cacheDate = localStorage.getItem('dolivar_last_date');
-  
-  if (!forzar && cacheUSD && cacheEUR && cacheDate === fechaEfectiva) {
-    bcvRate = parseFloat(cacheUSD);
-    eurRate = parseFloat(cacheEUR);
-    displayRates(fechaEfectiva, 'cache');
-    return;
-  }
-  
+  // ✅ CAPA 1: API SIEMPRE PRIMERO (no cache)
   try {
     const endpoint = esMismaFecha 
       ? 'https://bcv-api.rafnixg.dev/rates/'
       : `https://bcv-api.rafnixg.dev/rates/${fechaEfectiva}`;
     
-    console.log(`🔍 [DEBUG] Llamando a: ${endpoint}`);
+    console.log(`🔍 [DEBUG] Llamando API: ${endpoint}`);
     const response = await fetch(endpoint);
     
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -747,12 +733,13 @@ async function fetchBCVRates(forzar = false) {
       
       saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
       displayRates(fechaEfectiva, 'api');
-      return;
+      return; // ✅ Éxito, no usar cache
     }
   } catch (e1) {
-    console.warn("🔍 RafnixG falló:", e1);
+    console.warn("🔍 API falló, usando cache como fallback:", e1);
   }
   
+  // ✅ CAPA 2: Scraping BCV (solo antes de 4 PM)
   if (horaVE < 16) {
     try {
       const response = await fetch(
@@ -777,18 +764,25 @@ async function fetchBCVRates(forzar = false) {
     }
   }
   
+  // ✅ CAPA 3: Cache SOLO como último recurso
+  const cacheUSD = localStorage.getItem('dolivar_last_usd_rate');
+  const cacheEUR = localStorage.getItem('dolivar_last_eur_rate');
+  const cacheDate = localStorage.getItem('dolivar_last_date');
+  
   if (cacheUSD && cacheEUR && cacheDate) {
     bcvRate = parseFloat(cacheUSD);
     eurRate = parseFloat(cacheEUR);
     updateUI();
     rateLabel.innerHTML = `USD: <span class="rate-value">${bcvRate.toLocaleString('de-DE', {minimumFractionDigits: 2})}</span> | EUR: <span class="rate-value">${eurRate.toLocaleString('de-DE', {minimumFractionDigits: 2})}</span> Bs`;
-    dateLabel.innerHTML = `⚠️ Datos del ${formatDateVE(cacheDate)} — Toque largo para forzar`;
+    dateLabel.innerHTML = `⚠️ SIN CONEXIÓN - Datos del ${formatDateVE(cacheDate)}`;
     rateLabel.classList.remove('loading-pulse');
+    console.log(`🔍 [FALLBACK] Usando cache: USD=${bcvRate}, EUR=${eurRate}`);
     return;
   }
   
-  rateLabel.innerHTML = "⚠️ Error. Toque largo para forzar";
-  dateLabel.innerHTML = '';
+  // ❌ Error total
+  rateLabel.innerHTML = "⚠️ Sin conexión";
+  dateLabel.innerHTML = 'Toque largo para reintentar';
   rateLabel.classList.remove('loading-pulse');
 }
 
@@ -822,7 +816,6 @@ function saveRatesToStorage(usd, eur, date) {
     localStorage.setItem('dolivar_last_date', date);
 }
 
-// ✅ FUNCIÓN displayRates ACTUALIZADA CON MENSAJE CLARO
 function displayRates(fechaUsada = null, fuente = 'api') {
     if (!bcvRate || !eurRate) return;
     
@@ -833,12 +826,10 @@ function displayRates(fechaUsada = null, fuente = 'api') {
     const dateStr = fechaUsada || localStorage.getItem('dolivar_last_date') || new Date().toISOString();
     const fechaFinal = formatDateVE(dateStr);
     
-    // ✅ Calcular fecha de vencimiento (mañana a las 12 PM)
     const mañana = new Date();
     mañana.setDate(mañana.getDate() + 1);
     const fechaMañana = mañana.toISOString().split('T')[0];
     
-    // ✅ Mensaje claro: cuándo VENCE esta tasa
     const mensajeVigencia = `VIGENTE HASTA: 12 PM ${formatDateVE(fechaMañana)}`;
     
     const indicadores = {
@@ -858,15 +849,15 @@ function displayRates(fechaUsada = null, fuente = 'api') {
 }
 
 // ============================================================================
-// ⏱️ TOQUE LARGO PARA FORZAR ACTUALIZACIÓN
+// ⏱️ TOQUE LARGO PARA FORZAR
 // ============================================================================
 
 function startLongPress() {
   longPressTimer = setTimeout(() => {
-    console.log("🔍 Toque largo detectado - Forzando actualización");
+    console.log("🔍 Toque largo - Forzando");
     if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-    fetchBCVRates(true); // true = forzar
-  }, 3000); // 3 segundos
+    fetchBCVRates(true);
+  }, 3000);
 }
 
 function cancelLongPress() {
@@ -1132,9 +1123,10 @@ function clearDisplay() {
     updateUI(); 
 }
 
+// ✅ AL ABRIR: SIEMPRE CONSULTA API (no cache)
 window.onload = () => { 
     initTheme(); 
-    fetchBCVRates(); 
+    fetchBCVRates(false); // false = no forzar, pero igual consulta API primero
     const savedPair = localStorage.getItem('dolivar_input_pair');
     if (savedPair) {
         inputPair = savedPair;
