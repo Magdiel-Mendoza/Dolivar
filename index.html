@@ -5,19 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Dolivar - Calculadora BCV Profesional</title>
     
-    <!-- ✅ Nombre y descripción obligatorios para PWABuilder -->
     <meta name="name" content="Dolivar">
     <meta name="description" content="Calculadora inteligente para sumar y convertir precios en dólares (US$), euros (€) y bolívares (Bs) al instante.">
     
-    <!-- Configuración PWA -->
     <meta name="theme-color" content="#7D1935">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <!-- Ícono PWA -->
     <link rel="apple-touch-icon" href="image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMxZTI5M2IiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2Y4ZmFmYyIgZm9udC1zaXplPSIxMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiPlVTJMKgL0JzPC90ZXh0Pjwvc3ZnPg==">
 
-    <!-- ✅ Manifest físico (NO en base64) -->
     <link rel="manifest" href="manifest.json">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -89,6 +85,12 @@
             flex-direction: column;
             gap: 4px;
             cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        
+        .rate-top-bar:active {
+            background: rgba(15, 23, 42, 0.5);
         }
 
         .display-area {
@@ -196,7 +198,6 @@
         }
         .modal-overlay.active { display: block; }
 
-        /* ✅ FUENTE MÁS GRANDE Y LEGIBLE PARA TASAS */
         #rate-label { 
             cursor: pointer; 
             font-size: 16px; 
@@ -311,7 +312,6 @@
 <div class="calc-container">
     <div id="modal-overlay" class="modal-overlay" onclick="closeAllModals()"></div>
     
-    <!-- Modal de Configuración -->
     <div id="settings-modal" class="settings-modal">
         <h3 class="font-bold text-lg mb-4">Configuración</h3>
         <div class="flex flex-col gap-4">
@@ -362,7 +362,6 @@
         </div>
     </div>
 
-    <!-- Modal de Ayuda -->
     <div id="help-modal" class="help-modal">
         <h3 class="font-bold text-lg mb-3">Ayuda</h3>
         <div class="modal-content">
@@ -387,11 +386,10 @@
         <button class="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold" onclick="closeAllModals()">Cerrar</button>
     </div>
 
-    <!-- Modal de Acerca de -->
     <div id="about-modal" class="about-modal">
         <h3 class="font-bold text-lg mb-3">Acerca de</h3>
         <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.2.8b — 25/03/2026</p>
+            <p class="highlight">DOLIVAR v1.2.8c — 26/03/2026</p>
             <p class="mt-4">Desarrollador Principal</p>
             <p>Magdiel Mendoza</p>
             <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong> y <strong>Gemini AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
@@ -400,7 +398,8 @@
         <button class="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold" onclick="closeAllModals()">Cerrar</button>
     </div>
 
-    <div class="rate-top-bar transition-colors" onclick="fetchBCVRates()" title="Toca para actualizar tasas">
+    <!-- ✅ BARRA DE TASAS CON TOQUE LARGO PARA FORZAR ACTUALIZACIÓN -->
+    <div class="rate-top-bar transition-colors" onclick="fetchBCVRates()" onmousedown="startLongPress()" onmouseup="cancelLongPress()" ontouchstart="startLongPress()" ontouchend="cancelLongPress()" title="Toque para actualizar | Mantenga 3s para forzar">
         <span id="rate-label" class="loading-pulse uppercase tracking-[0.05em] text-slate-100 font-bold">
             Sincronizando tasas...
         </span>
@@ -456,8 +455,7 @@
 <script>
 /* 
  * Dolivar - Calculadora BCV Profesional
- * Última actualización: 25/03/2026
- * v1.2.8b: Lógica EUR calculada + Mensajes amigables + Indicador dev 🔍 + Fuente legible
+ * v1.2.8c: Mensaje de vigencia claro + Actualización forzada (3s)
  */
 
 let currentInputText = '0';
@@ -472,6 +470,9 @@ let lastOperator = null;
 let nextNumberIsMultiplier = false;
 let volumeLevel = parseFloat(localStorage.getItem('dolivar_volume') || '1.0');
 let vibrationDuration = parseInt(localStorage.getItem('dolivar_vibration') || '100');
+
+// ✅ Variable para toque largo
+let longPressTimer = null;
 
 const mainDisplay = document.getElementById('main-display');
 const convertedDisplay = document.getElementById('converted-display');
@@ -488,7 +489,6 @@ const volumeValue = document.getElementById('volume-value');
 const vibrationValue = document.getElementById('vibration-value');
 const currencySymbol = document.getElementById('currency-symbol');
 
-// Inicializar controles
 if (volumeSlider) {
     volumeSlider.value = Math.round(volumeLevel * 100);
     volumeValue.textContent = Math.round(volumeLevel * 100) + '%';
@@ -611,7 +611,7 @@ function toggleTheme() {
 }
 
 // ============================================================================
-// 🇻🇪 LÓGICA DE FECHA EFECTIVA PARA TASAS BCV
+// 🇻🇪 LÓGICA DE FECHA EFECTIVA
 // ============================================================================
 
 function getEffectiveRateDate(now = null) {
@@ -671,13 +671,23 @@ function formatDateVE(dateStr) {
 }
 
 // ============================================================================
-// 💱 OBTENCIÓN DE TASAS CON LÓGICA EUR CALCULADA
+// 💱 OBTENCIÓN DE TASAS
 // ============================================================================
 
-async function fetchBCVRates() {
+async function fetchBCVRates(forzar = false) {
   if (navigator.vibrate && vibrationDuration > 0) navigator.vibrate(30);
   
-  rateLabel.innerHTML = "Sincronizando...";
+  // ✅ Si es forzado, limpiar cache primero
+  if (forzar) {
+    localStorage.removeItem('dolivar_last_usd_rate');
+    localStorage.removeItem('dolivar_last_eur_rate');
+    localStorage.removeItem('dolivar_last_date');
+    rateLabel.innerHTML = "FORZANDO ACTUALIZACIÓN...";
+    console.log("🔍 [FORZAR] Cache limpiado");
+  } else {
+    rateLabel.innerHTML = "Sincronizando...";
+  }
+  
   dateLabel.innerHTML = "";
   rateLabel.classList.add('loading-pulse');
 
@@ -688,19 +698,17 @@ async function fetchBCVRates() {
   
   console.log(`🔍 [DEBUG] Fecha efectiva: ${fechaEfectiva} | Hora VE: ${horaVE}`);
   
-  // ✅ CAPA 1: Cache válido
   const cacheUSD = localStorage.getItem('dolivar_last_usd_rate');
   const cacheEUR = localStorage.getItem('dolivar_last_eur_rate');
   const cacheDate = localStorage.getItem('dolivar_last_date');
   
-  if (cacheUSD && cacheEUR && cacheDate === fechaEfectiva) {
+  if (!forzar && cacheUSD && cacheEUR && cacheDate === fechaEfectiva) {
     bcvRate = parseFloat(cacheUSD);
     eurRate = parseFloat(cacheEUR);
     displayRates(fechaEfectiva, 'cache');
     return;
   }
   
-  // ✅ CAPA 2: RafnixG API (Corregida)
   try {
     const endpoint = esMismaFecha 
       ? 'https://bcv-api.rafnixg.dev/rates/'
@@ -714,7 +722,6 @@ async function fetchBCVRates() {
     const data = await response.json();
     console.log(`🔍 [DEBUG] Respuesta API:`, data);
     
-    // ✅ CORRECCIÓN: La API devuelve { usd: 46.5, eur: 53.2 } o { dolar: {...}, euro: {...} }
     let apiUSD = null;
     let apiEUR = null;
     
@@ -736,7 +743,6 @@ async function fetchBCVRates() {
     
     if (apiUSD) {
       bcvRate = apiUSD;
-      // Si la API no trae EUR, lo calculamos
       eurRate = apiEUR ? apiEUR : await calcularEURDesdeUSD(bcvRate, fechaEfectiva);
       
       saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
@@ -747,7 +753,6 @@ async function fetchBCVRates() {
     console.warn("🔍 RafnixG falló:", e1);
   }
   
-  // ✅ CAPA 3: Scraping BCV (Antes de 4 PM)
   if (horaVE < 16) {
     try {
       const response = await fetch(
@@ -772,27 +777,21 @@ async function fetchBCVRates() {
     }
   }
   
-  // ✅ CAPA 4: Fallback Cache Antiguo
   if (cacheUSD && cacheEUR && cacheDate) {
     bcvRate = parseFloat(cacheUSD);
     eurRate = parseFloat(cacheEUR);
     updateUI();
     rateLabel.innerHTML = `USD: <span class="rate-value">${bcvRate.toLocaleString('de-DE', {minimumFractionDigits: 2})}</span> | EUR: <span class="rate-value">${eurRate.toLocaleString('de-DE', {minimumFractionDigits: 2})}</span> Bs`;
-    dateLabel.innerHTML = `⚠️ Datos del ${formatDateVE(cacheDate)} — Toca para actualizar`;
+    dateLabel.innerHTML = `⚠️ Datos del ${formatDateVE(cacheDate)} — Toque largo para forzar`;
     rateLabel.classList.remove('loading-pulse');
     return;
   }
   
-  // ❌ Error
-  rateLabel.innerHTML = "⚠️ Error. Toca para reintentar";
+  rateLabel.innerHTML = "⚠️ Error. Toque largo para forzar";
   dateLabel.innerHTML = '';
   rateLabel.classList.remove('loading-pulse');
 }
 
-/**
- * Calcula EUR basado en USD del BCV + ratio EUR/USD internacional
- * 🔍 Indicador dev: fuente = 'ratio' en consola
- */
 async function calcularEURDesdeUSD(usdBCV, fecha) {
   try {
     const response = await fetch(
@@ -805,15 +804,15 @@ async function calcularEURDesdeUSD(usdBCV, fecha) {
       
       if (ratioEURUSD && ratioEURUSD > 0) {
         const eurBCV = usdBCV / ratioEURUSD;
-        console.log(`🔍 EUR calculado: ${usdBCV} / ${ratioEURUSD} = ${eurBCV.toFixed(2)} [fuente: ratio]`);
+        console.log(`🔍 EUR calculado: ${usdBCV} / ${ratioEURUSD} = ${eurBCV.toFixed(2)}`);
         return eurBCV;
       }
     }
   } catch (e) {
-    console.warn("🔍 Ratio EUR/USD no disponible, usando fallback:", e);
+    console.warn("🔍 Ratio EUR/USD no disponible:", e);
   }
   
-  console.log(`🔍 EUR fallback: ${usdBCV} × 1.16 = ${(usdBCV * 1.16).toFixed(2)} [fuente: fallback]`);
+  console.log(`🔍 EUR fallback: ${usdBCV} × 1.16`);
   return usdBCV * 1.16;
 }
 
@@ -823,6 +822,7 @@ function saveRatesToStorage(usd, eur, date) {
     localStorage.setItem('dolivar_last_date', date);
 }
 
+// ✅ FUNCIÓN displayRates ACTUALIZADA CON MENSAJE CLARO
 function displayRates(fechaUsada = null, fuente = 'api') {
     if (!bcvRate || !eurRate) return;
     
@@ -833,10 +833,13 @@ function displayRates(fechaUsada = null, fuente = 'api') {
     const dateStr = fechaUsada || localStorage.getItem('dolivar_last_date') || new Date().toISOString();
     const fechaFinal = formatDateVE(dateStr);
     
-    const hoy = new Date().toISOString().split('T')[0];
-    const mensajeVigencia = (dateStr === hoy) 
-      ? `TASA VIGENTE PARA HOY: ${fechaFinal} - BCV`
-      : `TASA VIGENTE DESDE: ${fechaFinal} - BCV`;
+    // ✅ Calcular fecha de vencimiento (mañana a las 12 PM)
+    const mañana = new Date();
+    mañana.setDate(mañana.getDate() + 1);
+    const fechaMañana = mañana.toISOString().split('T')[0];
+    
+    // ✅ Mensaje claro: cuándo VENCE esta tasa
+    const mensajeVigencia = `VIGENTE HASTA: 12 PM ${formatDateVE(fechaMañana)}`;
     
     const indicadores = {
       'api': '🟢',
@@ -848,10 +851,29 @@ function displayRates(fechaUsada = null, fuente = 'api') {
     
     dateLabel.innerHTML = `${mensajeVigencia} <span title="Fuente: ${fuente}">${indicator}</span>`;
     
-    console.log(`🔍 Tasas cargadas: USD=${bcvRate}, EUR=${eurRate}, Fecha=${dateStr}, Fuente=${fuente}`);
+    console.log(`🔍 Tasas: USD=${bcvRate}, EUR=${eurRate}, Fecha=${dateStr}, Fuente=${fuente}`);
     
     rateLabel.classList.remove('loading-pulse');
     updateUI();
+}
+
+// ============================================================================
+// ⏱️ TOQUE LARGO PARA FORZAR ACTUALIZACIÓN
+// ============================================================================
+
+function startLongPress() {
+  longPressTimer = setTimeout(() => {
+    console.log("🔍 Toque largo detectado - Forzando actualización");
+    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+    fetchBCVRates(true); // true = forzar
+  }, 3000); // 3 segundos
+}
+
+function cancelLongPress() {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
 }
 
 function setInputPair(pair) {
