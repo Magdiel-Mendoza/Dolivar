@@ -1,6 +1,6 @@
 /*
  * Dolivar - Service Worker
- * v1.2.7 — 28/03/2026
+ * v1.2.8 — 28/03/2026
  * Permite instalación como app nativa y funcionamiento sin internet
  */
 
