@@ -597,10 +597,18 @@ function toggleTheme() {
 function getEffectiveRateDate() {
     const now = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Caracas" }));
     const hora = now.getHours();
+    const diaSemana = now.getDay(); // 0=dom, 1=lun, 2=mar... 6=sab
+
     let fechaTasa = new Date(now);
 
-    // Antes de las 12pm usamos la tasa del día anterior
-    if (hora < 12) {
+    // Retroceder si es fin de semana, feriado, o antes de las 12pm
+    // La tasa publicada el día X entra en vigencia el día X+1 a las 12pm
+    // Por eso siempre buscamos el último día hábil ANTERIOR al día actual
+    // excepto si es después de las 12pm de un día hábil
+
+    const esHabilHoy = !esFeriadoVenezuela(now) && diaSemana !== 0 && diaSemana !== 6;
+
+    if (!esHabilHoy || hora < 12) {
         fechaTasa.setDate(fechaTasa.getDate() - 1);
     }
 
@@ -804,8 +812,9 @@ function displayRates(fechaUsada) {
     const eurFormatted = eurRate.toLocaleString('de-DE', {minimumFractionDigits: 2});
     rateLabel.innerHTML = `USD: <span class="rate-value">${usdFormatted}</span> | EUR: <span class="rate-value">${eurFormatted}</span> Bs`;
 
-    const fechaFinal = formatDateVE(fechaUsada || localStorage.getItem('dolivar_last_date') || new Date().toISOString().split('T')[0]);
-    dateLabel.innerHTML = `TASAS VIGENTES AL: ${fechaFinal}`;
+    const hoyVE = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Caracas" }));
+    const hoyStr = formatDateVE(hoyVE.toISOString().split('T')[0]);
+    dateLabel.innerHTML = `TASAS VIGENTES PARA HOY: ${hoyStr}`;
 
     rateLabel.classList.remove('loading-pulse');
     updateUI();
