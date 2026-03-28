@@ -1,969 +1,843 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Dolivar - Calculadora BCV Profesional</title>
-    
-    <!-- ✅ Nombre y descripción obligatorios para PWABuilder -->
-    <meta name="name" content="Dolivar">
-    <meta name="description" content="Calculadora inteligente para sumar y convertir precios en dólares (US$), euros (€) y bolívares (Bs) al instante.">
-    
-    <!-- Configuración PWA -->
-    <meta name="theme-color" content="#7D1935">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <!-- Ícono PWA -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMxZTI5M2IiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2Y4ZmFmYyIgZm9udC1zaXplPSIxMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiPlVTJMKgL0JzPC90ZXh0Pjwvc3ZnPg==">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Dolivar - Calculadora BCV Profesional</title>
+<meta name="name" content="Dolivar">
+<meta name="description" content="Calculadora inteligente para sumar y convertir precios en dólares (US$), euros (€) y bolívares (Bs) al instante.">
+<meta name="theme-color" content="#7D1935">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMxZTI5M2IiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2Y4ZmFmYyIgZm9udC1zaXplPSIxMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiPlVTJMKgL0JzPC90ZXh0Pjwvc3ZnPg==">
+<link rel="manifest" href="manifest.json">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
 
-    <!-- ✅ Manifest físico (NO en base64) -->
-    <link rel="manifest" href="manifest.json">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root {
-            --bg-body: #94a3b8;
-            --bg-calc: #475569; 
-            --text-main: #f8fafc;
-            --bg-display: #0f172a;
-            --bg-btn-num: #cbd5e1;
-            --text-btn-num: #0f172a;
-            --bg-btn-op: #94a3b8;
-            --text-btn-op: #0f172a;
-            --border-btn: #334155;
-            --bg-modal: rgba(255, 255, 255, 0.95);
-            --text-modal: #0f172a;
-        }
-
-        .dark-mode {
-            --bg-body: #020617;
-            --bg-calc: #1e293b;
-            --text-main: #f8fafc;
-            --bg-display: #020617;
-            --bg-btn-num: #334155;
-            --text-btn-num: #f8fafc;
-            --bg-btn-op: #475569;
-            --text-btn-op: #f1f5f9;
-            --border-btn: #475569;
-            --bg-modal: rgba(30, 41, 59, 0.95);
-            --text-modal: #f8fafc;
-        }
-
-        body {
-            background-color: var(--bg-body);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100dvh;
-            margin: 0;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            transition: all 0.3s ease;
-            touch-action: manipulation;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-        }
-
-        .calc-container {
-            width: 100%;
-            max-width: 400px;
-            background-color: var(--bg-calc);
-            border-radius: 2.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
-            padding: 1.25rem;
-            border: 1.5px solid var(--border-btn);
-            position: relative;
-            max-height: 95dvh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .rate-top-bar {
-            text-align: center;
-            margin-bottom: 0.8rem;
-            padding: 0.5rem;
-            background: rgba(15, 23, 42, 0.3);
-            border-radius: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .display-area {
-            background-color: var(--bg-display);
-            border-radius: 1.75rem;
-            padding: 1.1rem 1.3rem;
-            margin-bottom: 1.2rem;
-            text-align: right;
-            color: white;
-            min-height: 130px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
-            overflow: hidden;
-        }
-
-        .btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 64px;
-            border-radius: 1.15rem;
-            font-size: 1.45rem;
-            font-weight: 700;
-            transition: all 0.1s ease;
-            cursor: pointer;
-            user-select: none;
-            border-bottom: 3px solid var(--border-btn);
-        }
-
-        .btn:active { transform: translateY(2px); border-bottom-width: 1px; }
-
-        .btn-number { background-color: var(--bg-btn-num); color: var(--text-btn-num); }
-        .btn-op { background-color: var(--bg-btn-op); color: var(--text-btn-op); }
-        .btn-eq { background-color: #2563eb; color: #ffffff; border-bottom-color: #1d4ed8; }
-        .btn-clear { background-color: #be123c; color: #ffffff; border-bottom-color: #881337; }
-        .btn-del { background-color: #f59e0b; color: #ffffff; border-bottom-color: #b45309; }
-
-        .btn-op, .btn-eq {
-            border-bottom: 4px solid var(--border-btn);
-            font-weight: 800;
-        }
-        .btn-op:active, .btn-eq:active {
-            transform: translateY(3px);
-            border-bottom-width: 1px;
-        }
-
-        .dark-mode .btn-op,
-        .dark-mode .btn-eq {
-            color: #ffffff;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-        }
-
-        .control-icon {
-            color: #94a3b8;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 38px;
-            height: 38px;
-            flex-shrink: 0;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        .control-icon:hover { color: #f1f5f9; background: rgba(255, 255, 255, 0.2); }
-        .control-icon svg { width: 20px; height: 20px; display: block; }
-
-        .settings-modal, .help-modal, .about-modal {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            width: 80%;
-            background: var(--bg-modal);
-            backdrop-filter: blur(10px);
-            border-radius: 2rem;
-            padding: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-            display: none;
-            z-index: 50;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--text-modal);
-            text-align: center;
-        }
-        .settings-modal.active, .help-modal.active, .about-modal.active {
-            display: block;
-            animation: modalIn 0.2s forwards;
-        }
-        
-        @keyframes modalIn {
-            to { transform: translate(-50%, -50%) scale(1); }
-        }
-
-        .modal-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            border-radius: 2.5rem;
-            display: none;
-            z-index: 40;
-        }
-        .modal-overlay.active { display: block; }
-
-        #rate-label { cursor: pointer; font-size: 13px; display: block; }
-        #date-label { font-size: 10px; color: #94a3b8; font-weight: 500; }
-        .rate-value { color: #60a5fa; font-weight: 900; }
-        .loading-pulse { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-
-        #operation-history {
-            font-family: 'JetBrains Mono', monospace;
-            min-height: 1.5rem;
-            opacity: 0.8;
-            overflow-x: auto;
-            white-space: nowrap;
-            scrollbar-width: none;
-            flex-grow: 1;
-            text-align: right;
-            padding-left: 8px;
-            margin-left: 8px;
-            max-width: calc(100% - 50px);
-            font-size: 1.15rem; /* ✅ Fuente más grande */
-        }
-        #operation-history::-webkit-scrollbar {
-            display: none;
-        }
-        
-        .modal-content {
-            text-align: left;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            max-height: 220px;
-            overflow-y: auto;
-        }
-        .highlight {
-            background: rgba(0,0,0,0.05);
-            padding: 0.2rem 0.4rem;
-            border-radius: 0.25rem;
-            font-weight: bold;
-            display: inline-block;
-            margin: 0.2rem 0;
-        }
-
-        #main-display {
-            font-size: 1.75rem;
-            font-weight: 900;
-            letter-spacing: -0.025em;
-            color: white;
-            word-break: break-word;
-            overflow-wrap: break-word;
-            white-space: normal;
-            line-height: 1.25;
-        }
-
-        #converted-display {
-            color: #60a5fa;
-            font-size: 1.05rem;
-            font-weight: 700;
-            word-break: break-word;
-            overflow-wrap: break-word;
-            white-space: normal;
-        }
-
-        .grid-buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.75rem;
-            flex-grow: 1;
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: #d1d5db;
-            outline: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #7D1935;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-    </style>
+:root {
+--bg-body: #94a3b8;
+--bg-calc: #475569;
+--text-main: #f8fafc;
+--bg-display: #0f172a;
+--bg-btn-num: #cbd5e1;
+--text-btn-num: #0f172a;
+--bg-btn-op: #94a3b8;
+--text-btn-op: #0f172a;
+--border-btn: #334155;
+--bg-modal: rgba(255, 255, 255, 0.95);
+--text-modal: #0f172a;
+}
+.dark-mode {
+--bg-body: #020617;
+--bg-calc: #1e293b;
+--text-main: #f8fafc;
+--bg-display: #020617;
+--bg-btn-num: #334155;
+--text-btn-num: #f8fafc;
+--bg-btn-op: #475569;
+--text-btn-op: #f1f5f9;
+--border-btn: #475569;
+--bg-modal: rgba(30, 41, 59, 0.95);
+--text-modal: #f8fafc;
+}
+body {
+background-color: var(--bg-body);
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100dvh;
+margin: 0;
+font-family: 'Inter', system-ui, -apple-system, sans-serif;
+transition: all 0.3s ease;
+touch-action: manipulation;
+padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.calc-container {
+width: 100%;
+max-width: 400px;
+background-color: var(--bg-calc);
+border-radius: 2.5rem;
+box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+padding: 1.25rem;
+border: 1.5px solid var(--border-btn);
+position: relative;
+max-height: 95dvh;
+overflow: hidden;
+display: flex;
+flex-direction: column;
+}
+.rate-top-bar {
+text-align: center;
+margin-bottom: 0.8rem;
+padding: 0.7rem 0.9rem;
+background: rgba(15, 23, 42, 0.3);
+border-radius: 1rem;
+border: 1px solid rgba(255, 255, 255, 0.1);
+display: flex;
+flex-direction: column;
+gap: 4px;
+cursor: pointer;
+user-select: none;
+transition: background 0.2s;
+min-width: 0;
+overflow: hidden;
+}
+.rate-top-bar:active {
+background: rgba(15, 23, 42, 0.5);
+}
+.display-area {
+background-color: var(--bg-display);
+border-radius: 1.75rem;
+padding: 1.1rem 1.3rem;
+margin-bottom: 1.2rem;
+text-align: right;
+color: white;
+min-height: 130px;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+overflow: hidden;
+}
+.btn {
+display: flex;
+justify-content: center;
+align-items: center;
+height: 64px;
+border-radius: 1.15rem;
+font-size: 1.45rem;
+font-weight: 700;
+transition: all 0.1s ease;
+cursor: pointer;
+user-select: none;
+border-bottom: 3px solid var(--border-btn);
+}
+.btn:active { transform: translateY(2px); border-bottom-width: 1px; }
+.btn-number { background-color: var(--bg-btn-num); color: var(--text-btn-num); }
+.btn-op { background-color: var(--bg-btn-op); color: var(--text-btn-op); }
+.btn-eq { background-color: #2563eb; color: #ffffff; border-bottom-color: #1d4ed8; }
+.btn-clear { background-color: #be123c; color: #ffffff; border-bottom-color: #881337; }
+.btn-del { background-color: #f59e0b; color: #ffffff; border-bottom-color: #b45309; }
+.btn-op, .btn-eq {
+border-bottom: 4px solid var(--border-btn);
+font-weight: 800;
+}
+.btn-op:active, .btn-eq:active {
+transform: translateY(3px);
+border-bottom-width: 1px;
+}
+.dark-mode .btn-op, .dark-mode .btn-eq {
+color: #ffffff;
+text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+.control-icon {
+color: #94a3b8;
+cursor: pointer;
+transition: all 0.2s;
+background: rgba(255, 255, 255, 0.1);
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+width: 38px;
+height: 38px;
+flex-shrink: 0;
+border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.control-icon:hover { color: #f1f5f9; background: rgba(255, 255, 255, 0.2); }
+.control-icon svg { width: 20px; height: 20px; display: block; }
+.settings-modal, .help-modal, .about-modal {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%) scale(0.9);
+width: 80%;
+background: var(--bg-modal);
+backdrop-filter: blur(10px);
+border-radius: 2rem;
+padding: 1.5rem;
+box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+display: none;
+z-index: 50;
+border: 1px solid rgba(255, 255, 255, 0.2);
+color: var(--text-modal);
+text-align: center;
+}
+.settings-modal.active, .help-modal.active, .about-modal.active {
+display: block;
+animation: modalIn 0.2s forwards;
+}
+@keyframes modalIn {
+to { transform: translate(-50%, -50%) scale(1); }
+}
+.modal-overlay {
+position: absolute;
+top: 0; left: 0; right: 0; bottom: 0;
+background: rgba(0,0,0,0.5);
+border-radius: 2.5rem;
+display: none;
+z-index: 40;
+}
+.modal-overlay.active { display: block; }
+#rate-label {
+cursor: pointer;
+font-size: 15px;
+display: block;
+font-weight: 800;
+text-transform: uppercase;
+letter-spacing: 0.02em;
+line-height: 1.4;
+white-space: normal;
+word-break: break-word;
+}
+#date-label {
+font-size: 12px;
+color: #94a3b8;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.02em;
+line-height: 1.4;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 6px;
+width: 100%;
+}
+.rate-value {
+color: #60a5fa;
+font-weight: 900;
+font-size: 1.08em;
+display: inline;
+}
+.loading-pulse { animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+#operation-history {
+font-family: 'JetBrains Mono', monospace;
+min-height: 1.5rem;
+opacity: 0.8;
+overflow-x: auto;
+white-space: nowrap;
+scrollbar-width: none;
+flex-grow: 1;
+text-align: right;
+padding-left: 8px;
+margin-left: 8px;
+max-width: calc(100% - 50px);
+font-size: 1.15rem;
+}
+#operation-history::-webkit-scrollbar { display: none; }
+.modal-content {
+text-align: left;
+font-size: 0.9rem;
+line-height: 1.5;
+max-height: 220px;
+overflow-y: auto;
+}
+.highlight {
+background: rgba(0,0,0,0.05);
+padding: 0.2rem 0.4rem;
+border-radius: 0.25rem;
+font-weight: bold;
+display: inline-block;
+margin: 0.2rem 0;
+}
+#main-display {
+font-size: 1.75rem;
+font-weight: 900;
+letter-spacing: -0.025em;
+color: white;
+word-break: break-word;
+overflow-wrap: break-word;
+white-space: normal;
+line-height: 1.25;
+}
+#converted-display {
+color: #60a5fa;
+font-size: 1.05rem;
+font-weight: 700;
+word-break: break-word;
+overflow-wrap: break-word;
+white-space: normal;
+}
+.grid-buttons {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 0.75rem;
+flex-grow: 1;
+}
+input[type="range"] {
+-webkit-appearance: none;
+width: 100%;
+height: 6px;
+border-radius: 3px;
+background: #d1d5db;
+outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+-webkit-appearance: none;
+appearance: none;
+width: 20px;
+height: 20px;
+border-radius: 50%;
+background: #7D1935;
+cursor: pointer;
+box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+</style>
 </head>
 <body>
-
 <div class="calc-container">
-    <div id="modal-overlay" class="modal-overlay" onclick="closeAllModals()"></div>
-    
-    <!-- Modal de Configuración -->
-    <div id="settings-modal" class="settings-modal">
-        <h3 class="font-bold text-lg mb-4">Configuración</h3>
-        <div class="flex flex-col gap-4">
-            <div class="flex items-center justify-between p-3 bg-black/10 rounded-xl cursor-pointer" onclick="toggleTheme()">
-                <span>Modo Oscuro/Claro</span>
-                <div class="control-icon">
-                    <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-                    </svg>
-                    <svg id="moon-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
-                </div>
-            </div>
-
-            <div class="p-3 bg-black/10 rounded-xl cursor-pointer" onclick="setInputPair('usd-bs')">
-                <span>Modo de entrada: US$/Bs</span>
-            </div>
-            <div class="p-3 bg-black/10 rounded-xl cursor-pointer" onclick="setInputPair('eur-bs')">
-                <span>Modo de entrada: Euro/Bs</span>
-            </div>
-
-            <div class="p-3 bg-black/10 rounded-xl">
-                <div class="flex justify-between items-center mb-2">
-                    <span>🔊 Volumen</span>
-                    <span id="volume-value">100%</span>
-                </div>
-                <input type="range" id="volume-slider" min="0" max="100" value="100" 
-                       class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer">
-            </div>
-
-            <div class="p-3 bg-black/10 rounded-xl">
-                <div class="flex justify-between items-center mb-2">
-                    <span>📳 Vibración</span>
-                    <span id="vibration-value">100 ms</span>
-                </div>
-                <input type="range" id="vibration-slider" min="0" max="150" value="100" 
-                       class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer">
-            </div>
-
-            <div class="p-3 bg-black/10 rounded-xl cursor-pointer" onclick="showHelp()">
-                <span>Ayuda</span>
-            </div>
-            <div class="p-3 bg-black/10 rounded-xl cursor-pointer" onclick="showAbout()">
-                <span>Acerca de</span>
-            </div>
-            <button class="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold" onclick="closeAllModals()">Cerrar</button>
-        </div>
-    </div>
-
-    <!-- Modal de Ayuda -->
-    <div id="help-modal" class="help-modal">
-        <h3 class="font-bold text-lg mb-3">Ayuda</h3>
-        <div class="modal-content">
-            <p><strong>Dolivar</strong></p>
-            <ul>
-                <li>✅ <strong>Soporta USD, EUR y Bs</strong>: opera en las tres monedas oficiales.</li>
-                <li>✅ <strong>Respeta la lógica del abasto</strong>: mezcla precios en dólares, euros y bolívares.</li>
-                <li>✅ <strong>Interpreta correctamente las cantidades</strong>: <code>×3</code>, <code>/2</code> sin moneda, porque son unidades, no montos.</li>
-                <li>✅ <strong>Calcula con jerarquía matemática</strong>: multiplicación y división antes que suma y resta.</li>
-                <li>✅ <strong>Muestra resultados confiables</strong>: ya sea en USD, EUR o Bs, según lo necesites.</li>
-            </ul>
-            <p>Esto no es solo una calculadora: es una <strong>herramienta de toma de decisiones diarias</strong> para quienes viven y compran en un entorno trimonetario.</p>
-            <p class="font-bold mt-3">Guía de Uso</p>
-            <ul>
-                <li>🔹 <strong>Conversión en Tiempo Real</strong>: Al introducir un monto, la calculadora muestra automáticamente la equivalencia en las otras monedas basándose en las tasas oficiales.</li>
-                <li>🔹 <strong>Cambio de Moneda</strong>: Toca el botón del selector para alternar entre la moneda fuerte y los bolívares dentro del par seleccionado.</li>
-                <li>🔹 <strong>Jerarquía Matemática</strong>: El sistema procesa primero multiplicaciones/divisiones y luego sumas/restas, garantizando resultados exactos en operaciones complejas.</li>
-                <li>🔹 <strong>Tasas BCV y EUR</strong>: Los datos se sincronizan con APIs oficiales. Puedes forzar una actualización tocando la barra superior.</li>
-                <li>🔹 <strong>Historial</strong>: En la parte superior de la pantalla de visualización, verás la secuencia de tu operación actual.</li>
-            </ul>
-        </div>
-        <button class="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold" onclick="closeAllModals()">Cerrar</button>
-    </div>
-
-    <!-- Modal de Acerca de -->
-    <div id="about-modal" class="about-modal">
-        <h3 class="font-bold text-lg mb-3">Acerca de</h3>
-        <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.2.6 — 22/01/2026</p>
-            <p class="mt-4">Desarrollador Principal</p>
-            <p>Magdiel Mendoza</p>
-            <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong> y <strong>Gemini AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
-            <p class="mt-4">☕ Esta es una herramienta gratuita. Si te ha sido de utilidad, ¡acepto donaciones! (Aunque no tomo café, tu donación es como si me invitaras un café, un gesto siempre se agradece).</p>
-        </div>
-        <button class="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold" onclick="closeAllModals()">Cerrar</button>
-    </div>
-
-    <div class="rate-top-bar transition-colors" onclick="fetchBCVRates()">
-        <span id="rate-label" class="loading-pulse uppercase tracking-[0.05em] text-slate-100 font-bold">
-            Sincronizando tasas...
-        </span>
-        <span id="date-label"></span>
-    </div>
-
-    <div class="display-area">
-        <div class="flex justify-between items-center mb-1 w-full overflow-hidden">
-            <div class="control-icon" onclick="toggleSettings()" title="Configuración">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
-            </div>
-            <div id="operation-history" class="text-slate-400 text-sm font-medium tracking-wide"></div>
-        </div>
-        
-        <div class="flex flex-col gap-1">
-            <div id="main-display">$ 0</div>
-            <div id="converted-display">Bs. 0,00</div>
-        </div>
-    </div>
-
-    <div class="grid-buttons">
-        <div class="btn btn-clear" onclick="clearDisplay()">AC</div>
-        <div class="btn btn-del" onclick="deleteLast()">Del</div>
-        <div class="btn btn-op" onclick="toggleCurrencyMode()" style="font-size: 1.4rem; font-weight: 800;">
-            <span id="currency-symbol">US$</span>
-        </div>
-        <div class="btn btn-op" onclick="setOperator('/')">÷</div>
-
-        <div class="btn btn-number" onclick="addNum('7')">7</div>
-        <div class="btn btn-number" onclick="addNum('8')">8</div>
-        <div class="btn btn-number" onclick="addNum('9')">9</div>
-        <div class="btn btn-op" onclick="setOperator('*')">×</div>
-
-        <div class="btn btn-number" onclick="addNum('4')">4</div>
-        <div class="btn btn-number" onclick="addNum('5')">5</div>
-        <div class="btn btn-number" onclick="addNum('6')">6</div>
-        <div class="btn btn-op" onclick="setOperator('-')">−</div>
-
-        <div class="btn btn-number" onclick="addNum('1')">1</div>
-        <div class="btn btn-number" onclick="addNum('2')">2</div>
-        <div class="btn btn-number" onclick="addNum('3')">3</div>
-        <div class="btn btn-op" onclick="setOperator('+')">+</div>
-
-        <div class="btn btn-number col-span-2" onclick="addNum('0')">0</div>
-        <div class="btn btn-number" onclick="addNum('.')">.</div>
-        <div class="btn btn-eq" onclick="calc()">=</div>
-    </div>
+<div id="modal-overlay" class="modal-overlay" onclick="closeAllModals()"></div>
+<div id="settings-modal" class="settings-modal">
+<h3 class="font-bold text-lg mb-4">Configuración</h3>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between p-3 bg-black/10 rounded-xl cursor-pointer" onclick="toggleTheme()">
+<span>Modo Oscuro/Claro</span>
+<div class="control-icon">
+<svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+</svg>
+<svg id="moon-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+</svg>
 </div>
-
+</div>
+<div class="p-3 bg-black/10 rounded-xl cursor-pointer" onclick="setInputPair('usd-bs')">
+<span>Modo de entrada: US$/Bs</span>
+</div>
+<div class="p-3 bg-black/10 rounded-xl cursor-pointer" onclick="setInputPair('eur-bs')">
+<span>Modo de entrada: Euro/Bs</span>
+</div>
+<div class="p-3 bg-black/10 rounded-xl">
+<div class="flex justify-between items-center mb-2">
+<span>🔊 Volumen</span>
+<span id="volume-value">100%</span>
+</div>
+<input type="range" id="volume-slider" min="0" max="100" value="100" class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer">
+</div>
+<div class="p-3 bg-black/10 rounded-xl">
+<div class="flex justify-between items-center mb-2">
+<span>📳 Vibración</span>
+<span id="vibration-value">100 ms</span>
+</div>
+<input type="range" id="vibration-slider" min="0" max="150" value="100" class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer">
+</div>
+<div class="p-3 bg-black/10 rounded-xl cursor-pointer" onclick="showHelp()">
+<span>Ayuda</span>
+</div>
+<div class="p-3 bg-black/10 rounded-xl cursor-pointer" onclick="showAbout()">
+<span>Acerca de</span>
+</div>
+<button class="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold" onclick="closeAllModals()">Cerrar</button>
+</div>
+</div>
+<div id="help-modal" class="help-modal">
+<h3 class="font-bold text-lg mb-3">Ayuda</h3>
+<div class="modal-content">
+<p><strong>Dolivar</strong></p>
+<ul>
+<li>✅ <strong>Soporta USD, EUR y Bs</strong>: opera en las tres monedas oficiales.</li>
+<li>✅ <strong>Respeta la lógica del abasto</strong>: mezcla precios en dólares, euros y bolívares.</li>
+<li>✅ <strong>Interpreta correctamente las cantidades</strong>: <code>×3</code>, <code>/2</code> sin moneda, porque son unidades, no montos.</li>
+<li>✅ <strong>Calcula con jerarquía matemática</strong>: multiplicación y división antes que suma y resta.</li>
+<li>✅ <strong>Muestra resultados confiables</strong>: ya sea en USD, EUR o Bs, según lo necesites.</li>
+</ul>
+<p>Esto no es solo una calculadora: es una <strong>herramienta de toma de decisiones diarias</strong> para quienes viven y compran en un entorno trimonetario.</p>
+<p class="font-bold mt-3">Guía de Uso</p>
+<ul>
+<li>🔹 <strong>Conversión en Tiempo Real</strong>: Al introducir un monto, la calculadora muestra automáticamente la equivalencia en las otras monedas basándose en las tasas oficiales.</li>
+<li>🔹 <strong>Cambio de Moneda</strong>: Toca el botón del selector para alternar entre la moneda fuerte y los bolívares dentro del par seleccionado.</li>
+<li>🔹 <strong>Jerarquía Matemática</strong>: El sistema procesa primero multiplicaciones/divisiones y luego sumas/restas, garantizando resultados exactos en operaciones complejas.</li>
+<li>🔹 <strong>Tasas BCV y EUR</strong>: Los datos se sincronizan con APIs oficiales. Puedes forzar una actualización tocando la barra superior.</li>
+<li>🔹 <strong>Historial</strong>: En la parte superior de la pantalla de visualización, verás la secuencia de tu operación actual.</li>
+</ul>
+</div>
+<button class="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold" onclick="closeAllModals()">Cerrar</button>
+</div>
+<div id="about-modal" class="about-modal">
+<h3 class="font-bold text-lg mb-3">Acerca de</h3>
+<div class="modal-content text-center">
+<p class="highlight">DOLIVAR v1.2.9 — 27/03/2026</p>
+<p class="mt-4">Desarrollador Principal</p>
+<p>Magdiel Mendoza</p>
+<p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong> y <strong>Gemini AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
+<p class="mt-4">☕ Esta es una herramienta gratuita. Si te ha sido de utilidad, ¡acepto donaciones! (Aunque no tomo café, tu donación es como si me invitaras un café, un gesto siempre se agradece).</p>
+</div>
+<button class="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold" onclick="closeAllModals()">Cerrar</button>
+</div>
+<div class="rate-top-bar transition-colors" onclick="fetchBCVRates()" onmousedown="startLongPress()" onmouseup="cancelLongPress()" ontouchstart="startLongPress()" ontouchend="cancelLongPress()" title="Toque para actualizar | Mantenga 3s para forzar">
+<span id="rate-label" class="loading-pulse uppercase tracking-[0.05em] text-slate-100 font-bold">Sincronizando tasas...</span>
+<span id="date-label"></span>
+</div>
+<div class="display-area">
+<div class="flex justify-between items-center mb-1 w-full overflow-hidden">
+<div class="control-icon" onclick="toggleSettings()" title="Configuración">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="12" cy="12" r="3"></circle>
+<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+</svg>
+</div>
+<div id="operation-history" class="text-slate-400 text-sm font-medium tracking-wide"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div id="main-display">$ 0</div>
+<div id="converted-display">Bs. 0,00</div>
+</div>
+</div>
+<div class="grid-buttons">
+<div class="btn btn-clear" onclick="clearDisplay()">AC</div>
+<div class="btn btn-del" onclick="deleteLast()">Del</div>
+<div class="btn btn-op" onclick="toggleCurrencyMode()" style="font-size:1.4rem;font-weight:800;">
+<span id="currency-symbol">US$</span>
+</div>
+<div class="btn btn-op" onclick="setOperator('/')">÷</div>
+<div class="btn btn-number" onclick="addNum('7')">7</div>
+<div class="btn btn-number" onclick="addNum('8')">8</div>
+<div class="btn btn-number" onclick="addNum('9')">9</div>
+<div class="btn btn-op" onclick="setOperator('*')">×</div>
+<div class="btn btn-number" onclick="addNum('4')">4</div>
+<div class="btn btn-number" onclick="addNum('5')">5</div>
+<div class="btn btn-number" onclick="addNum('6')">6</div>
+<div class="btn btn-op" onclick="setOperator('-')">−</div>
+<div class="btn btn-number" onclick="addNum('1')">1</div>
+<div class="btn btn-number" onclick="addNum('2')">2</div>
+<div class="btn btn-number" onclick="addNum('3')">3</div>
+<div class="btn btn-op" onclick="setOperator('+')">+</div>
+<div class="btn btn-number col-span-2" onclick="addNum('0')">0</div>
+<div class="btn btn-number" onclick="addNum('.')">.</div>
+<div class="btn btn-eq" onclick="calc()">=</div>
+</div>
+</div>
 <script>
-/* 
- * Dolivar - Calculadora BCV Profesional
- * Última actualización: 22/01/2026
- * v1.2.6: Selector de par en Configuración + botón alterna dentro del par + historial más legible
- */
-
-let currentInputText = '0';
-let expressionTokens = [];
-let isNewInput = true;
-let bcvRate = null;      // Tasa USD/Bs
-let eurRate = null;      // Tasa EUR/Bs
-let inputPair = 'usd-bs'; // 'usd-bs' o 'eur-bs'
-let inputCurrency = 'USD'; // 'USD', 'EUR' o 'BS' (solo para display)
-let audioCtx = null;
-let lastOperator = null;
-let nextNumberIsMultiplier = false;
-let volumeLevel = parseFloat(localStorage.getItem('dolivar_volume') || '1.0');
-let vibrationDuration = parseInt(localStorage.getItem('dolivar_vibration') || '100');
-
-const mainDisplay = document.getElementById('main-display');
-const convertedDisplay = document.getElementById('converted-display');
-const opHistoryDisplay = document.getElementById('operation-history');
-const rateLabel = document.getElementById('rate-label');
-const dateLabel = document.getElementById('date-label');
-const settingsModal = document.getElementById('settings-modal');
-const helpModal = document.getElementById('help-modal');
-const aboutModal = document.getElementById('about-modal');
-const modalOverlay = document.getElementById('modal-overlay');
-const volumeSlider = document.getElementById('volume-slider');
-const vibrationSlider = document.getElementById('vibration-slider');
-const volumeValue = document.getElementById('volume-value');
-const vibrationValue = document.getElementById('vibration-value');
-const currencySymbol = document.getElementById('currency-symbol');
-
-// Inicializar controles
-if (volumeSlider) {
-    volumeSlider.value = Math.round(volumeLevel * 100);
-    volumeValue.textContent = Math.round(volumeLevel * 100) + '%';
+/*
+* Dolivar - Calculadora BCV Profesional
+* v1.2.9: Calendario Sudeban 2026 + días hábiles
+*/
+let currentInputText='0';
+let expressionTokens=[];
+let isNewInput=true;
+let bcvRate=null;
+let eurRate=null;
+let inputPair='usd-bs';
+let inputCurrency='USD';
+let audioCtx=null;
+let lastOperator=null;
+let nextNumberIsMultiplier=false;
+let volumeLevel=parseFloat(localStorage.getItem('dolivar_volume')||'1.0');
+let vibrationDuration=parseInt(localStorage.getItem('dolivar_vibration')||'100');
+let longPressTimer=null;
+const mainDisplay=document.getElementById('main-display');
+const convertedDisplay=document.getElementById('converted-display');
+const opHistoryDisplay=document.getElementById('operation-history');
+const rateLabel=document.getElementById('rate-label');
+const dateLabel=document.getElementById('date-label');
+const settingsModal=document.getElementById('settings-modal');
+const helpModal=document.getElementById('help-modal');
+const aboutModal=document.getElementById('about-modal');
+const modalOverlay=document.getElementById('modal-overlay');
+const volumeSlider=document.getElementById('volume-slider');
+const vibrationSlider=document.getElementById('vibration-slider');
+const volumeValue=document.getElementById('volume-value');
+const vibrationValue=document.getElementById('vibration-value');
+const currencySymbol=document.getElementById('currency-symbol');
+if(volumeSlider){volumeSlider.value=Math.round(volumeLevel*100);volumeValue.textContent=Math.round(volumeLevel*100)+'%'}
+if(vibrationSlider){vibrationSlider.value=vibrationDuration;vibrationValue.textContent=vibrationDuration+' ms'}
+if(vibrationSlider){vibrationSlider.addEventListener('input',()=>{vibrationDuration=parseInt(vibrationSlider.value);vibrationValue.textContent=vibrationDuration+' ms';localStorage.setItem('dolivar_vibration',vibrationDuration.toString());if(navigator.vibrate&&vibrationDuration>0)navigator.vibrate(50)})}
+if(volumeSlider){volumeSlider.addEventListener('input',()=>{volumeLevel=parseFloat(volumeSlider.value)/100;volumeValue.textContent=volumeSlider.value+'%';localStorage.setItem('dolivar_volume',volumeLevel.toString());playSoundPreview()})}
+function playSoundPreview(){if(volumeLevel<=0)return;if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const osc=audioCtx.createOscillator();const gain=audioCtx.createGain();osc.connect(gain);gain.connect(audioCtx.destination);osc.frequency.setValueAtTime(600,audioCtx.currentTime);gain.gain.setValueAtTime(volumeLevel*0.1,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.15);osc.start();osc.stop(audioCtx.currentTime+0.15)}
+function playSound(type){if(volumeLevel<=0)return;if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const oscillator=audioCtx.createOscillator();const gainNode=audioCtx.createGain();oscillator.connect(gainNode);gainNode.connect(audioCtx.destination);let freq;switch(type){case'num':freq=600;break;case'eq':freq=750;break;case'clear':freq=180;break;default:freq=450}oscillator.type='sine';oscillator.frequency.setValueAtTime(freq,audioCtx.currentTime);gainNode.gain.setValueAtTime(volumeLevel*0.12,audioCtx.currentTime);gainNode.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);oscillator.start();oscillator.stop(audioCtx.currentTime+0.2)}
+function vibrate(){if(vibrationDuration>0&&navigator.vibrate){navigator.vibrate(vibrationDuration)}}
+function provideFeedback(type='op'){vibrate();playSound(type)}
+function toggleSettings(){provideFeedback('op');settingsModal.classList.add('active');modalOverlay.classList.add('active')}
+function closeAllModals(){settingsModal.classList.remove('active');helpModal.classList.remove('active');aboutModal.classList.remove('active');modalOverlay.classList.remove('active')}
+function showHelp(){settingsModal.classList.remove('active');helpModal.classList.add('active')}
+function showAbout(){settingsModal.classList.remove('active');aboutModal.classList.add('active')}
+function initTheme(){const savedTheme=localStorage.getItem('calc-theme');const isDark=savedTheme==='dark'||(!savedTheme&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(isDark){document.body.classList.add('dark-mode');document.getElementById('sun-icon').style.display='block';document.getElementById('moon-icon').style.display='none'}else{document.getElementById('sun-icon').style.display='none';document.getElementById('moon-icon').style.display='block'}}
+function toggleTheme(){provideFeedback('op');const isDark=document.body.classList.toggle('dark-mode');localStorage.setItem('calc-theme',isDark?'dark':'light');if(isDark){document.getElementById('sun-icon').style.display='block';document.getElementById('moon-icon').style.display='none'}else{document.getElementById('sun-icon').style.display='none';document.getElementById('moon-icon').style.display='block'}}
+// ============================================================================
+// 🇻🇪 LÓGICA DE FECHA EFECTIVA - CALENDARIO SUDEBAN 2026
+// ============================================================================
+function getEffectiveRateDate(now=null){
+if(!now){now=new Date(new Date().toLocaleString("en-US",{timeZone:"America/Caracas"}))}
+const hora=now.getHours();
+let fechaTasa=new Date(now);
+if(hora<12){fechaTasa.setDate(fechaTasa.getDate()-1)}
+let intentos=0;
+while(intentos<14){
+const diaSemana=fechaTasa.getDay();
+const esFinDeSemana=(diaSemana===0||diaSemana===6);
+const esFeriado=esFeriadoVenezuela(fechaTasa);
+const esLunesBancario=esLunesBancarioVenezuela(fechaTasa);
+if(esFinDeSemana||esFeriado||esLunesBancario){
+fechaTasa.setDate(fechaTasa.getDate()-1);
+intentos++;
+continue;
 }
-if (vibrationSlider) {
-    vibrationSlider.value = vibrationDuration;
-    vibrationValue.textContent = vibrationDuration + ' ms';
+break;
 }
-
-// Eventos sliders
-if (vibrationSlider) {
-    vibrationSlider.addEventListener('input', () => {
-        vibrationDuration = parseInt(vibrationSlider.value);
-        vibrationValue.textContent = vibrationDuration + ' ms';
-        localStorage.setItem('dolivar_vibration', vibrationDuration.toString());
-        if (navigator.vibrate && vibrationDuration > 0) navigator.vibrate(50);
-    });
+return fechaTasa.toISOString().split('T')[0];
 }
-if (volumeSlider) {
-    volumeSlider.addEventListener('input', () => {
-        volumeLevel = parseFloat(volumeSlider.value) / 100;
-        volumeValue.textContent = volumeSlider.value + '%';
-        localStorage.setItem('dolivar_volume', volumeLevel.toString());
-        playSoundPreview();
-    });
+function esFeriadoVenezuela(date){
+const mm=String(date.getMonth()+1).padStart(2,'0');
+const dd=String(date.getDate()).padStart(2,'0');
+const fechaStr=`${mm}-${dd}`;
+const year=date.getFullYear();
+const diaSemana = date.getDay();
+const feriadosFijos=[
+'01-01','01-06','01-19','02-04','03-04','01-05','24-06','24-07',
+'15-08','14-09','01-11','23-11','26-10','14-12','24-12','25-12','31-12'
+];
+const feriadosMoviles={
+2025:['03-03','03-04','04-17','04-18','06-02','06-16','06-23','08-18','09-15','11-24'],
+2026:['02-16','02-17','04-02','04-03','05-18','06-08'],
+2027:['02-15','02-16','03-25','03-26']
+};
+if((diaSemana===0||diaSemana===6)&&!feriadosFijos.includes(fechaStr)){
+if(feriadosMoviles[year]&&feriadosMoviles[year].includes(fechaStr)){return true;}
+return false;
 }
-
-// Sonido y vibración
-function playSoundPreview() {
-    if (volumeLevel <= 0) return;
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-    gain.gain.setValueAtTime(volumeLevel * 0.1, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+return feriadosFijos.includes(fechaStr)||(feriadosMoviles[year]&&feriadosMoviles[year].includes(fechaStr));
 }
-
-function playSound(type) {
-    if (volumeLevel <= 0) return;
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
-    let freq;
-    switch(type) {
-        case 'num': freq = 600; break;
-        case 'eq': freq = 750; break;
-        case 'clear': freq = 180; break;
-        default: freq = 450;
-    }
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    gainNode.gain.setValueAtTime(volumeLevel * 0.12, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 0.2);
+function esLunesBancarioVenezuela(date){
+const mm=String(date.getMonth()+1).padStart(2,'0');
+const dd=String(date.getDate()).padStart(2,'0');
+const fechaStr=`${mm}-${dd}`;
+const diaSemana=date.getDay();
+if(diaSemana!==1)return false;
+const lunesBancarios2026=['01-19','10-26','11-23','12-14'];
+return lunesBancarios2026.includes(fechaStr);
 }
-
-function vibrate() {
-    if (vibrationDuration > 0 && navigator.vibrate) {
-        navigator.vibrate(vibrationDuration);
-    }
+function formatDateVE(dateStr){
+if(!dateStr)return'';
+const[y,m,d]=dateStr.split('-');
+return`${d}/${m}/${y}`;
 }
-
-function provideFeedback(type = 'op') {
-    vibrate();
-    playSound(type);
+// ============================================================================
+// 💱 OBTENCIÓN DE TASAS - API PRIMERO, CACHE SOLO FALLBACK
+// ============================================================================
+async function fetchBCVRates(forzar=false){
+if(navigator.vibrate&&vibrationDuration>0)navigator.vibrate(30);
+if(forzar){
+localStorage.removeItem('dolivar_last_usd_rate');
+localStorage.removeItem('dolivar_last_eur_rate');
+localStorage.removeItem('dolivar_last_date');
+rateLabel.innerHTML="FORZANDO...";
+console.log("🔍 [FORZAR] Cache limpiado");
+}else{
+rateLabel.innerHTML="Sincronizando...";
 }
-
-// Modales
-function toggleSettings() {
-    provideFeedback('op');
-    settingsModal.classList.add('active');
-    modalOverlay.classList.add('active');
+dateLabel.innerHTML="";
+rateLabel.classList.add('loading-pulse');
+const fechaEfectiva=getEffectiveRateDate();
+const fechaActual=new Date().toISOString().split('T')[0];
+const horaVE=new Date().toLocaleString("en-US",{timeZone:"America/Caracas",hour:"numeric",hour12:false});
+const esMismaFecha=(fechaEfectiva===fechaActual);
+console.log(`🔍 [DEBUG] Fecha efectiva: ${fechaEfectiva} | Hora VE: ${horaVE}`);
+try{
+const endpoint=esMismaFecha?'https://bcv-api.rafnixg.dev/rates/':`https://bcv-api.rafnixg.dev/rates/${fechaEfectiva}`;
+console.log(`🔍 [DEBUG] Llamando API: ${endpoint}`);
+const response=await fetch(endpoint);
+if(!response.ok)throw new Error(`HTTP ${response.status}`);
+const data=await response.json();
+console.log(`🔍 [DEBUG] Respuesta API:`,data);
+let apiUSD=null;
+let apiEUR=null;
+if(data.usd){apiUSD=parseFloat(data.usd)}
+else if(data.dolar?.venta){apiUSD=parseFloat(data.dolar.venta)}
+else if(data.dolar){apiUSD=parseFloat(data.dolar)}
+if(data.eur){apiEUR=parseFloat(data.eur)}
+else if(data.euro?.venta){apiEUR=parseFloat(data.euro.venta)}
+else if(data.euro){apiEUR=parseFloat(data.euro)}
+if(apiUSD){
+bcvRate=apiUSD;
+eurRate=apiEUR?apiEUR:await calcularEURDesdeUSD(bcvRate,fechaEfectiva);
+saveRatesToStorage(bcvRate,eurRate,fechaEfectiva);
+displayRates(fechaEfectiva,'api');
+return;
 }
-
-function closeAllModals() {
-    settingsModal.classList.remove('active');
-    helpModal.classList.remove('active');
-    aboutModal.classList.remove('active');
-    modalOverlay.classList.remove('active');
+}catch(e1){
+console.warn("🔍 RafnixG falló:",e1);
 }
-
-function showHelp() {
-    settingsModal.classList.remove('active');
-    helpModal.classList.add('active');
+if(horaVE<16){
+try{
+const response=await fetch("https://corsproxy.io/?url="+encodeURIComponent("https://www.bcv.org.ve/"));
+if(response.ok){
+const html=await response.text();
+const usdMatch=html.match(/id="dolar"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
+const eurMatch=html.match(/id="euro"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
+if(usdMatch&&eurMatch){
+bcvRate=parseFloat(usdMatch[1].replace(/\./g,'').replace(',','.'));
+eurRate=parseFloat(eurMatch[1].replace(/\./g,'').replace(',','.'));
+saveRatesToStorage(bcvRate,eurRate,fechaEfectiva);
+displayRates(fechaEfectiva,'bcv');
+return;
 }
-
-function showAbout() {
-    settingsModal.classList.remove('active');
-    aboutModal.classList.add('active');
 }
-
-// Tema
-function initTheme() {
-    const savedTheme = localStorage.getItem('calc-theme');
-    const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    if (isDark) {
-        document.body.classList.add('dark-mode');
-        document.getElementById('sun-icon').style.display = 'block';
-        document.getElementById('moon-icon').style.display = 'none';
-    } else {
-        document.getElementById('sun-icon').style.display = 'none';
-        document.getElementById('moon-icon').style.display = 'block';
-    }
+}catch(e2){
+console.warn("🔍 Scraping falló:",e2);
 }
-
-function toggleTheme() {
-    provideFeedback('op');
-    const isDark = document.body.classList.toggle('dark-mode');
-    localStorage.setItem('calc-theme', isDark ? 'dark' : 'light');
-    if (isDark) {
-        document.getElementById('sun-icon').style.display = 'block';
-        document.getElementById('moon-icon').style.display = 'none';
-    } else {
-        document.getElementById('sun-icon').style.display = 'none';
-        document.getElementById('moon-icon').style.display = 'block';
-    }
 }
-
-// ✅ Obtención de tasas (USD + EUR) — scraping directo BCV
-async function fetchBCVRates() {
-  rateLabel.innerHTML = "Sincronizando tasas...";
-  dateLabel.innerHTML = "";
-  rateLabel.classList.add('loading-pulse');
-
-  // Intento 1: scraping directo del BCV via proxy CORS
-  try {
-    const response = await fetch(
-      "https://corsproxy.io/?url=" + encodeURIComponent("https://www.bcv.org.ve/")
-    );
-    if (response.ok) {
-      const html = await response.text();
-
-const usdMatch = html.match(/id="dolar"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
-const eurMatch = html.match(/id="euro"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
-
-      if (usdMatch && eurMatch) {
-        bcvRate = parseFloat(usdMatch[1].replace(/\./g, '').replace(',', '.'));
-        eurRate = parseFloat(eurMatch[1].replace(/\./g, '').replace(',', '.'));
-        const today = new Date().toISOString().split('T')[0];
-        saveRatesToStorage(bcvRate, eurRate, today);
-        displayRates();
-        return;
-      }
-    }
-  } catch (e1) {
-    console.warn("Scraping BCV falló:", e1);
-  }
-
-  // Intento 2: ve.dolarapi.com como respaldo
-  try {
-    const response2 = await fetch("https://ve.dolarapi.com/v1/dolares");
-    if (response2.ok) {
-      const data2 = await response2.json();
-      const oficial = data2.find(d => d.fuente === 'oficial');
-      if (oficial && oficial.promedio) {
-        bcvRate = parseFloat(oficial.promedio);
-        eurRate = bcvRate * 1.16;
-        saveRatesToStorage(bcvRate, eurRate, new Date().toISOString().split('T')[0]);
-        displayRates();
-        return;
-      }
-    }
-  } catch (e2) {
-    console.warn("API de respaldo falló:", e2);
-  }
-
-  // Intento 3: caché local (hasta 72 horas)
-  const lastUSD = localStorage.getItem('dolivar_last_usd_rate');
-  const lastEUR = localStorage.getItem('dolivar_last_eur_rate');
-  const lastDate = localStorage.getItem('dolivar_last_date');
-  const horasTranscurridas = lastDate
-    ? (Date.now() - new Date(lastDate).getTime()) / 36e5
-    : 999;
-
-  if (lastUSD && lastEUR && horasTranscurridas < 72) {
-    bcvRate = parseFloat(lastUSD);
-    eurRate = parseFloat(lastEUR);
-    updateUI();
-    rateLabel.innerHTML = `TASAS EN CACHÉ`;
-    dateLabel.innerHTML = `Guardadas hace ${Math.round(horasTranscurridas)}h — toca para actualizar`;
-    rateLabel.classList.remove('loading-pulse');
-    return;
-  }
-
-  rateLabel.innerText = "⚠️ Error de red. Toca para reintentar";
-  rateLabel.classList.remove('loading-pulse');
+const cacheUSD=localStorage.getItem('dolivar_last_usd_rate');
+const cacheEUR=localStorage.getItem('dolivar_last_eur_rate');
+const cacheDate=localStorage.getItem('dolivar_last_date');
+if(cacheUSD&&cacheEUR&&cacheDate){
+bcvRate=parseFloat(cacheUSD);
+eurRate=parseFloat(cacheEUR);
+updateUI();
+rateLabel.innerHTML=`USD: <span class="rate-value">${bcvRate.toLocaleString('de-DE',{minimumFractionDigits:2})}</span> | EUR: <span class="rate-value">${eurRate.toLocaleString('de-DE',{minimumFractionDigits:2})}</span> Bs`;
+dateLabel.innerHTML = `TASAS VIGENTES PARA HOY: ${formatDateVE(cacheDate)} 🟡`;
+rateLabel.classList.remove('loading-pulse');
+console.log(`🔍 [FALLBACK] Usando cache: USD=${bcvRate}, EUR=${eurRate}`);
+return;
 }
-function saveRatesToStorage(usd, eur, date) {
-    localStorage.setItem('dolivar_last_usd_rate', usd.toString());
-    localStorage.setItem('dolivar_last_eur_rate', eur.toString());
-    localStorage.setItem('dolivar_last_date', date);
+rateLabel.innerHTML="⚠️ Sin conexión";
+dateLabel.innerHTML='Toque largo para reintentar';
+rateLabel.classList.remove('loading-pulse');
 }
-
-function displayRates() {
-    if (!bcvRate || !eurRate) return;
-    
-    const usdFormatted = bcvRate.toLocaleString('de-DE', {minimumFractionDigits: 2});
-    const eurFormatted = eurRate.toLocaleString('de-DE', {minimumFractionDigits: 2});
-    rateLabel.innerHTML = `USD: <span class="rate-value">${usdFormatted}</span> | EUR: <span class="rate-value">${eurFormatted}</span> Bs`;
-    
-    const dateStr = localStorage.getItem('dolivar_last_date') || new Date().toISOString();
-    const d = new Date(dateStr);
-    const fechaFinal = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-    dateLabel.innerHTML = `TASAS ACTUALIZADAS AL: ${fechaFinal}`;
-    
-    rateLabel.classList.remove('loading-pulse');
-    updateUI();
+async function calcularEURDesdeUSD(usdBCV,fecha){
+try{
+const response=await fetch(`https://api.exchangerate.host/${fecha}?base=USD&symbols=EUR`);
+if(response.ok){
+const data=await response.json();
+const ratioEURUSD=data.rates.EUR;
+if(ratioEURUSD&&ratioEURUSD>0){
+const eurBCV=usdBCV/ratioEURUSD;
+console.log(`🔍 EUR calculado: ${usdBCV} / ${ratioEURUSD} = ${eurBCV.toFixed(2)}`);
+return eurBCV;
 }
-
-// ✅ Cambiar par desde configuración
-function setInputPair(pair) {
-    provideFeedback('op');
-    inputPair = pair;
-    localStorage.setItem('dolivar_input_pair', pair);
-    
-    // Reiniciar a moneda fuerte
-    if (pair === 'usd-bs') {
-        inputCurrency = 'USD';
-        currencySymbol.textContent = 'US$';
-    } else {
-        inputCurrency = 'EUR';
-        currencySymbol.textContent = '€';
-    }
-    
-    currentInputText = '0';
-    expressionTokens = [];
-    isNewInput = true;
-    updateUI();
-    closeAllModals();
 }
-
-// ✅ Alternar moneda dentro del par
-function toggleCurrencyMode() {
-    provideFeedback('op');
-    if (!bcvRate || !eurRate) {
-        alert("⚠️ Primero sincroniza las tasas.");
-        return;
-    }
-
-    let currentVal = parseFloat(currentInputText.replace(/,/g, '')) || 0;
-
-    if (inputPair === 'usd-bs') {
-        if (inputCurrency === 'USD') {
-            // Convertir a Bs
-            currentInputText = (currentVal * bcvRate).toFixed(2);
-            inputCurrency = 'BS';
-            currencySymbol.textContent = 'Bs';
-        } else {
-            // Convertir a USD
-            currentInputText = (currentVal / bcvRate).toFixed(2);
-            inputCurrency = 'USD';
-            currencySymbol.textContent = 'US$';
-        }
-    } else { // eur-bs
-        if (inputCurrency === 'EUR') {
-            // Convertir a Bs
-            currentInputText = (currentVal * eurRate).toFixed(2);
-            inputCurrency = 'BS';
-            currencySymbol.textContent = 'Bs';
-        } else {
-            // Convertir a EUR
-            currentInputText = (currentVal / eurRate).toFixed(2);
-            inputCurrency = 'EUR';
-            currencySymbol.textContent = '€';
-        }
-    }
-
-    if (currentInputText.endsWith('.00')) {
-        currentInputText = parseInt(parseFloat(currentInputText)).toString();
-    }
-
-    updateUI();
+}catch(e){
+console.warn("🔍 Ratio EUR/USD no disponible:",e);
 }
-
-// Actualizar UI
-function updateUI() {
-    let prefix, convertedText;
-    
-    // Determinar prefijo y valor principal
-    if (inputCurrency === 'USD') {
-        prefix = '$ ';
-    } else if (inputCurrency === 'EUR') {
-        prefix = '€ ';
-    } else {
-        prefix = 'Bs. ';
-    }
-
-    let displayVal = currentInputText;
-    const numValue = parseFloat(currentInputText.replace(/,/g, '')) || 0;
-
-    if (Math.abs(numValue) >= 1e10) {
-        displayVal = numValue.toExponential(5).replace(/e\+?/, 'e');
-    } else if (currentInputText !== '0') {
-        const parts = currentInputText.split('.');
-        const integerPart = parseInt(parts[0]).toLocaleString('de-DE');
-        displayVal = parts.length > 1 ? integerPart + ',' + parts[1] : integerPart;
-    } else {
-        displayVal = "0";
-    }
-
-    mainDisplay.innerText = prefix + displayVal;
-
-    // Calcular valor convertido
-    if (bcvRate && eurRate) {
-        let val = parseFloat(currentInputText.replace(/,/g, '')) || 0;
-        if (inputPair === 'usd-bs') {
-            if (inputCurrency === 'USD') {
-                convertedText = `Bs. ${(val * bcvRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            } else { // BS
-                convertedText = `$ ${(val / bcvRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            }
-        } else { // eur-bs
-            if (inputCurrency === 'EUR') {
-                convertedText = `Bs. ${(val * eurRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            } else { // BS
-                convertedText = `€ ${(val / eurRate).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            }
-        }
-    } else {
-        convertedText = "Tasa no disponible";
-    }
-
-    convertedDisplay.innerText = convertedText;
-    updateHistory();
-    opHistoryDisplay.scrollLeft = opHistoryDisplay.scrollWidth;
+console.log(`🔍 EUR fallback: ${usdBCV} × 1.16`);
+return usdBCV*1.16;
 }
-
-function updateHistory() {
-    let displayParts = [];
-    for (let token of expressionTokens) {
-        if (typeof token === 'string') {
-            displayParts.push(token);
-        } else {
-            if (token.currency === 'UNIT') {
-                displayParts.push(token.value);
-            } else {
-                const prefix = token.currency === 'USD' ? '$' : token.currency === 'EUR' ? '€' : 'Bs';
-                displayParts.push(prefix + token.value);
-            }
-        }
-    }
-    if (currentInputText !== '0' || expressionTokens.length === 0) {
-        if (nextNumberIsMultiplier) {
-            displayParts.push(currentInputText);
-        } else {
-            const prefix = inputCurrency === 'USD' ? '$' : inputCurrency === 'EUR' ? '€' : 'Bs';
-            displayParts.push(prefix + currentInputText);
-        }
-    }
-    opHistoryDisplay.innerText = displayParts.join('');
+function saveRatesToStorage(usd,eur,date){
+localStorage.setItem('dolivar_last_usd_rate',usd.toString());
+localStorage.setItem('dolivar_last_eur_rate',eur.toString());
+localStorage.setItem('dolivar_last_date',date);
 }
-
-// Botones numéricos
-function addNum(n) {
-    provideFeedback('num');
-    if (isNewInput) {
-        currentInputText = (n === '.') ? '0.' : n;
-        isNewInput = false;
-    } else {
-        if (n === '.' && currentInputText.includes('.')) return;
-        if (currentInputText.includes('.') && currentInputText.split('.')[1].length >= 2) return;
-        if (currentInputText === '0' && n !== '.') currentInputText = n;
-        else currentInputText += n;
-    }
-    updateUI();
+function displayRates(fechaUsada=null,fuente='api'){
+if(!bcvRate||!eurRate)return;
+const usdFormatted=bcvRate.toLocaleString('de-DE',{minimumFractionDigits:2});
+const eurFormatted=eurRate.toLocaleString('de-DE',{minimumFractionDigits:2});
+rateLabel.innerHTML=`USD: <span class="rate-value">${usdFormatted}</span> | EUR: <span class="rate-value">${eurFormatted}</span> Bs`;
+const dateStr=fechaUsada||localStorage.getItem('dolivar_last_date')||new Date().toISOString();
+// Calcular vencimiento: 12 PM del siguiente día HÁBIL
+let fechaVencimiento=new Date(dateStr);
+fechaVencimiento.setDate(fechaVencimiento.getDate()+1);
+let intentosVenc=0;
+while(intentosVenc<14){
+const diaSemana=fechaVencimiento.getDay();
+const esFinDeSemana=(diaSemana===0||diaSemana===6);
+const esFeriado=esFeriadoVenezuela(fechaVencimiento);
+const esLunesBancario=esLunesBancarioVenezuela(fechaVencimiento);
+if(esFinDeSemana||esFeriado||esLunesBancario){
+fechaVencimiento.setDate(fechaVencimiento.getDate()+1);
+intentosVenc++;
+continue;
 }
-
-function deleteLast() {
-    provideFeedback('op');
-    if (isNewInput || currentInputText === '0') return;
-    currentInputText = currentInputText.length === 1 ? '0' : currentInputText.slice(0, -1);
-    updateUI();
+break;
 }
-
-function captureCurrentNumber() {
-    const token = {
-        value: currentInputText,
-        currency: nextNumberIsMultiplier ? 'UNIT' : inputCurrency
-    };
-    nextNumberIsMultiplier = false;
-    return token;
+const mensajeVigencia=`VIGENTE HASTA: 12 PM ${formatDateVE(fechaVencimiento.toISOString().split('T')[0])}`;
+const indicadores={'api':'🟢','bcv':'🔵','cache':'🟡','fallback':'🟠'};
+const indicator=indicadores[fuente]||'⚪';
+dateLabel.innerHTML=`${mensajeVigencia} ${indicator}`;
+console.log(`🔍 Tasas: USD=${bcvRate}, EUR=${eurRate}, Fecha=${dateStr}, Fuente=${fuente}`);
+rateLabel.classList.remove('loading-pulse');
+updateUI();
 }
-
-function setOperator(op) {
-    provideFeedback('op');
-    if (currentInputText === '0' && expressionTokens.length === 0) return;
-    expressionTokens.push(captureCurrentNumber());
-    expressionTokens.push(op);
-    lastOperator = op;
-    nextNumberIsMultiplier = (op === '*' || op === '/');
-    isNewInput = true;
-    currentInputText = '0';
-    updateUI();
+function startLongPress(){
+longPressTimer=setTimeout(()=>{
+console.log("🔍 Toque largo - Forzando");
+if(navigator.vibrate)navigator.vibrate([50,50,50]);
+fetchBCVRates(true);
+},3000);
 }
-
-function evaluateWithPrecedence(tokens, usdRate, eurRate) {
-    const workTokens = [...tokens];
-    for (let i = 1; i < workTokens.length; i += 2) {
-        if (workTokens[i] === '*' || workTokens[i] === '/') {
-            const left = workTokens[i - 1];
-            const right = workTokens[i + 1];
-            let leftUSD = parseFloat(left.value);
-            if (left.currency === 'BS') leftUSD /= usdRate;
-            else if (left.currency === 'EUR') leftUSD = (leftUSD * eurRate) / usdRate;
-            
-            const rightNum = parseFloat(right.value);
-            const resultUSD = workTokens[i] === '*' 
-                ? leftUSD * rightNum 
-                : (rightNum === 0 ? 0 : leftUSD / rightNum);
-                
-            workTokens.splice(i - 1, 3, { value: resultUSD.toString(), currency: 'USD' });
-            i -= 2;
-        }
-    }
-    let totalUSD = 0;
-    let currentSign = 1;
-    for (let i = 0; i < workTokens.length; i++) {
-        const token = workTokens[i];
-        if (typeof token === 'string') {
-            if (token === '+') currentSign = 1;
-            else if (token === '-') currentSign = -1;
-        } else {
-            let val = parseFloat(token.value);
-            if (token.currency === 'BS') val /= usdRate;
-            else if (token.currency === 'EUR') val = (val * eurRate) / usdRate;
-            totalUSD += currentSign * val;
-            currentSign = 1;
-        }
-    }
-    return totalUSD;
+function cancelLongPress(){
+if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null}
 }
-
-function calc() {
-    provideFeedback('eq');
-    if (expressionTokens.length === 0) return;
-    if (!bcvRate || !eurRate) {
-        alert("⚠️ No se han cargado las tasas.");
-        return;
-    }
-    expressionTokens.push(captureCurrentNumber());
-    const resultUSD = evaluateWithPrecedence(expressionTokens, bcvRate, eurRate);
-    
-    if (inputPair === 'usd-bs') {
-        if (inputCurrency === 'USD') {
-            currentInputText = resultUSD.toFixed(2);
-        } else {
-            currentInputText = (resultUSD * bcvRate).toFixed(2);
-        }
-    } else { // eur-bs
-        if (inputCurrency === 'EUR') {
-            currentInputText = (resultUSD * bcvRate / eurRate).toFixed(2);
-        } else {
-            currentInputText = (resultUSD * bcvRate).toFixed(2);
-        }
-    }
-    
-    if (currentInputText.endsWith('.00')) {
-        currentInputText = parseInt(parseFloat(currentInputText)).toString();
-    }
-    expressionTokens = [];
-    lastOperator = null;
-    nextNumberIsMultiplier = false;
-    isNewInput = true;
-    updateUI();
+function setInputPair(pair){
+provideFeedback('op');
+inputPair=pair;
+localStorage.setItem('dolivar_input_pair',pair);
+if(pair==='usd-bs'){inputCurrency='USD';currencySymbol.textContent='US$'}
+else{inputCurrency='EUR';currencySymbol.textContent='€'}
+currentInputText='0';
+expressionTokens=[];
+isNewInput=true;
+updateUI();
+closeAllModals();
 }
-
-function clearDisplay() { 
-    provideFeedback('clear'); 
-    currentInputText = '0';
-    expressionTokens = [];
-    lastOperator = null;
-    nextNumberIsMultiplier = false;
-    isNewInput = true;
-    updateUI(); 
+function toggleCurrencyMode(){
+provideFeedback('op');
+if(!bcvRate||!eurRate){alert("⚠️ Primero sincroniza las tasas.");return}
+let currentVal=parseFloat(currentInputText.replace(/,/g,''))||0;
+if(inputPair==='usd-bs'){
+if(inputCurrency==='USD'){currentInputText=(currentVal*bcvRate).toFixed(2);inputCurrency='BS';currencySymbol.textContent='Bs'}
+else{currentInputText=(currentVal/bcvRate).toFixed(2);inputCurrency='USD';currencySymbol.textContent='US$'}
+}else{
+if(inputCurrency==='EUR'){currentInputText=(currentVal*eurRate).toFixed(2);inputCurrency='BS';currencySymbol.textContent='Bs'}
+else{currentInputText=(currentVal/eurRate).toFixed(2);inputCurrency='EUR';currencySymbol.textContent='€'}
 }
-
-// Inicialización
-window.onload = () => { 
-    initTheme(); 
-    fetchBCVRates(); 
-    // Restaurar par guardado
-    const savedPair = localStorage.getItem('dolivar_input_pair');
-    if (savedPair) {
-        inputPair = savedPair;
-        if (inputPair === 'usd-bs') {
-            inputCurrency = 'USD';
-            currencySymbol.textContent = 'US$';
-        } else {
-            inputCurrency = 'EUR';
-            currencySymbol.textContent = '€';
-        }
-    }
+if(currentInputText.endsWith('.00')){currentInputText=parseInt(parseFloat(currentInputText)).toString()}
+updateUI();
+}
+function updateUI(){
+let prefix,convertedText;
+if(inputCurrency==='USD'){prefix='$ '}
+else if(inputCurrency==='EUR'){prefix='€ '}
+else{prefix='Bs. '}
+let displayVal=currentInputText;
+const numValue=parseFloat(currentInputText.replace(/,/g,''))||0;
+if(Math.abs(numValue)>=1e10){displayVal=numValue.toExponential(5).replace(/e\+?/,'e')}
+else if(currentInputText!=='0'){
+const parts=currentInputText.split('.');
+const integerPart=parseInt(parts[0]).toLocaleString('de-DE');
+displayVal=parts.length>1?integerPart+','+parts[1]:integerPart;
+}else{displayVal="0"}
+mainDisplay.innerText=prefix+displayVal;
+if(bcvRate&&eurRate){
+let val=parseFloat(currentInputText.replace(/,/g,''))||0;
+if(inputPair==='usd-bs'){
+if(inputCurrency==='USD'){convertedText=`Bs. ${(val*bcvRate).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})}`}
+else{convertedText=`$ ${(val/bcvRate).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})}`}
+}else{
+if(inputCurrency==='EUR'){convertedText=`Bs. ${(val*eurRate).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})}`}
+else{convertedText=`€ ${(val/eurRate).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})}`}
+}
+}else{convertedText="Tasa no disponible"}
+convertedDisplay.innerText=convertedText;
+updateHistory();
+opHistoryDisplay.scrollLeft=opHistoryDisplay.scrollWidth;
+}
+function updateHistory(){
+let displayParts=[];
+for(let token of expressionTokens){
+if(typeof token==='string'){displayParts.push(token)}
+else{
+if(token.currency==='UNIT'){displayParts.push(token.value)}
+else{
+const prefix=token.currency==='USD'?'$':token.currency==='EUR'?'€':'Bs';
+displayParts.push(prefix+token.value);
+}
+}
+}
+if(currentInputText!=='0'||expressionTokens.length===0){
+if(nextNumberIsMultiplier){displayParts.push(currentInputText)}
+else{
+const prefix=inputCurrency==='USD'?'$':inputCurrency==='EUR'?'€':'Bs';
+displayParts.push(prefix+currentInputText);
+}
+}
+opHistoryDisplay.innerText=displayParts.join('');
+}
+function addNum(n){
+provideFeedback('num');
+if(isNewInput){currentInputText=(n==='.')?'0.':n;isNewInput=false}
+else{
+if(n==='.'&&currentInputText.includes('.'))return;
+if(currentInputText.includes('.')&&currentInputText.split('.')[1].length>=2)return;
+if(currentInputText==='0'&&n!=='.')currentInputText=n;
+else currentInputText+=n;
+}
+updateUI();
+}
+function deleteLast(){
+provideFeedback('op');
+if(isNewInput||currentInputText==='0')return;
+currentInputText=currentInputText.length===1?'0':currentInputText.slice(0,-1);
+updateUI();
+}
+function captureCurrentNumber(){
+const token={value:currentInputText,currency:nextNumberIsMultiplier?'UNIT':inputCurrency};
+nextNumberIsMultiplier=false;
+return token;
+}
+function setOperator(op){
+provideFeedback('op');
+if(currentInputText==='0'&&expressionTokens.length===0)return;
+expressionTokens.push(captureCurrentNumber());
+expressionTokens.push(op);
+lastOperator=op;
+nextNumberIsMultiplier=(op==='*'||op==='/');
+isNewInput=true;
+currentInputText='0';
+updateUI();
+}
+function evaluateWithPrecedence(tokens,usdRate,eurRate){
+const workTokens=[...tokens];
+for(let i=1;i<workTokens.length;i+=2){
+if(workTokens[i]==='*'||workTokens[i]==='/'){
+const left=workTokens[i-1];
+const right=workTokens[i+1];
+let leftUSD=parseFloat(left.value);
+if(left.currency==='BS')leftUSD/=usdRate;
+else if(left.currency==='EUR')leftUSD=(leftUSD*eurRate)/usdRate;
+const rightNum=parseFloat(right.value);
+const resultUSD=workTokens[i]==='*'?leftUSD*rightNum:(rightNum===0?0:leftUSD/rightNum);
+workTokens.splice(i-1,3,{value:resultUSD.toString(),currency:'USD'});
+i-=2;
+}
+}
+let totalUSD=0;
+let currentSign=1;
+for(let i=0;i<workTokens.length;i++){
+const token=workTokens[i];
+if(typeof token==='string'){
+if(token==='+')currentSign=1;
+else if(token==='-')currentSign=-1;
+}else{
+let val=parseFloat(token.value);
+if(token.currency==='BS')val/=usdRate;
+else if(token.currency==='EUR')val=(val*eurRate)/usdRate;
+totalUSD+=currentSign*val;
+currentSign=1;
+}
+}
+return totalUSD;
+}
+function calc(){
+provideFeedback('eq');
+if(expressionTokens.length===0)return;
+if(!bcvRate||!eurRate){alert("⚠️ No se han cargado las tasas.");return}
+expressionTokens.push(captureCurrentNumber());
+const resultUSD=evaluateWithPrecedence(expressionTokens,bcvRate,eurRate);
+if(inputPair==='usd-bs'){
+if(inputCurrency==='USD'){currentInputText=resultUSD.toFixed(2)}
+else{currentInputText=(resultUSD*bcvRate).toFixed(2)}
+}else{
+if(inputCurrency==='EUR'){currentInputText=(resultUSD*bcvRate/eurRate).toFixed(2)}
+else{currentInputText=(resultUSD*bcvRate).toFixed(2)}
+}
+if(currentInputText.endsWith('.00')){currentInputText=parseInt(parseFloat(currentInputText)).toString()}
+expressionTokens=[];
+lastOperator=null;
+nextNumberIsMultiplier=false;
+isNewInput=true;
+updateUI();
+}
+function clearDisplay(){
+provideFeedback('clear');
+currentInputText='0';
+expressionTokens=[];
+lastOperator=null;
+nextNumberIsMultiplier=false;
+isNewInput=true;
+updateUI();
+}
+window.onload=()=>{
+initTheme();
+fetchBCVRates(false);
+const savedPair=localStorage.getItem('dolivar_input_pair');
+if(savedPair){
+inputPair=savedPair;
+if(inputPair==='usd-bs'){inputCurrency='USD';currencySymbol.textContent='US$'}
+else{inputCurrency='EUR';currencySymbol.textContent='€'}
+}
 };
 </script>
 </body>
