@@ -5,15 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Dolivar - Calculadora BCV Profesional</title>
     
+    <!-- ✅ Nombre y descripción obligatorios para PWABuilder -->
     <meta name="name" content="Dolivar">
     <meta name="description" content="Calculadora inteligente para sumar y convertir precios en dólares (US$), euros (€) y bolívares (Bs) al instante.">
     
+    <!-- Configuración PWA -->
     <meta name="theme-color" content="#7D1935">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <link rel="apple-touch-icon" href="image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMxZTI5M2IiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2Y4ZmFmYyIgZm9udC1zaXplPSIxMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiPlVTJMKgL0JzPC90ZXh0Pjwvc3ZnPg==">
+    <!-- Ícono PWA -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMxZTI5M2IiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2Y4ZmFmYyIgZm9udC1zaXplPSIxMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiPlVTJMKgL0JzPC90ZXh0Pjwvc3ZnPg==">
 
+    <!-- ✅ Manifest físico (NO en base64) -->
     <link rel="manifest" href="manifest.json">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -77,20 +81,13 @@
         .rate-top-bar {
             text-align: center;
             margin-bottom: 0.8rem;
-            padding: 0.7rem 0.9rem;
+            padding: 0.5rem;
             background: rgba(15, 23, 42, 0.3);
             border-radius: 1rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
-        }
-        
-        .rate-top-bar:active {
-            background: rgba(15, 23, 42, 0.5);
+            gap: 2px;
         }
 
         .display-area {
@@ -198,31 +195,9 @@
         }
         .modal-overlay.active { display: block; }
 
-        #rate-label { 
-            cursor: pointer; 
-            font-size: 16px; 
-            display: block;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            line-height: 1.4;
-        }
-        
-        #date-label { 
-            font-size: 13px; 
-            color: #94a3b8; 
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            line-height: 1.3;
-        }
-        
-        .rate-value { 
-            color: #60a5fa; 
-            font-weight: 900;
-            font-size: 1.08em;
-        }
-        
+        #rate-label { cursor: pointer; font-size: 13px; display: block; }
+        #date-label { font-size: 10px; color: #94a3b8; font-weight: 500; }
+        .rate-value { color: #60a5fa; font-weight: 900; }
         .loading-pulse { animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
 
@@ -312,6 +287,7 @@
 <div class="calc-container">
     <div id="modal-overlay" class="modal-overlay" onclick="closeAllModals()"></div>
     
+    <!-- Modal de Configuración -->
     <div id="settings-modal" class="settings-modal">
         <h3 class="font-bold text-lg mb-4">Configuración</h3>
         <div class="flex flex-col gap-4">
@@ -362,6 +338,7 @@
         </div>
     </div>
 
+    <!-- Modal de Ayuda -->
     <div id="help-modal" class="help-modal">
         <h3 class="font-bold text-lg mb-3">Ayuda</h3>
         <div class="modal-content">
@@ -386,19 +363,20 @@
         <button class="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold" onclick="closeAllModals()">Cerrar</button>
     </div>
 
+    <!-- Modal de Acerca de -->
     <div id="about-modal" class="about-modal">
         <h3 class="font-bold text-lg mb-3">Acerca de</h3>
         <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.2.8d — 26/03/2026</p>
+            <p class="highlight">DOLIVAR v1.2.7 — 27/03/2026</p>
             <p class="mt-4">Desarrollador Principal</p>
             <p>Magdiel Mendoza</p>
-            <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong> y <strong>Gemini AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
+            <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong>, <strong>Gemini AI</strong> y <strong>Claude AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
             <p class="mt-4">☕ Esta es una herramienta gratuita. Si te ha sido de utilidad, ¡acepto donaciones! (Aunque no tomo café, tu donación es como si me invitaras un café, un gesto siempre se agradece).</p>
         </div>
         <button class="mt-4 p-3 bg-blue-600 text-white rounded-xl font-bold" onclick="closeAllModals()">Cerrar</button>
     </div>
 
-    <div class="rate-top-bar transition-colors" onclick="fetchBCVRates()" onmousedown="startLongPress()" onmouseup="cancelLongPress()" ontouchstart="startLongPress()" ontouchend="cancelLongPress()" title="Toque para actualizar | Mantenga 3s para forzar">
+    <div class="rate-top-bar transition-colors" onclick="fetchBCVRates()">
         <span id="rate-label" class="loading-pulse uppercase tracking-[0.05em] text-slate-100 font-bold">
             Sincronizando tasas...
         </span>
@@ -454,7 +432,8 @@
 <script>
 /* 
  * Dolivar - Calculadora BCV Profesional
- * v1.2.8d: API primero, cache solo como fallback
+ * Última actualización: 27/03/2026
+ * v1.2.7: Nueva lógica de tasas con APIs históricas dolarapi.com + lógica de fecha efectiva BCV
  */
 
 let currentInputText = '0';
@@ -469,7 +448,6 @@ let lastOperator = null;
 let nextNumberIsMultiplier = false;
 let volumeLevel = parseFloat(localStorage.getItem('dolivar_volume') || '1.0');
 let vibrationDuration = parseInt(localStorage.getItem('dolivar_vibration') || '100');
-let longPressTimer = null;
 
 const mainDisplay = document.getElementById('main-display');
 const convertedDisplay = document.getElementById('converted-display');
@@ -486,6 +464,7 @@ const volumeValue = document.getElementById('volume-value');
 const vibrationValue = document.getElementById('vibration-value');
 const currencySymbol = document.getElementById('currency-symbol');
 
+// Inicializar controles
 if (volumeSlider) {
     volumeSlider.value = Math.round(volumeLevel * 100);
     volumeValue.textContent = Math.round(volumeLevel * 100) + '%';
@@ -495,6 +474,7 @@ if (vibrationSlider) {
     vibrationValue.textContent = vibrationDuration + ' ms';
 }
 
+// Eventos sliders
 if (vibrationSlider) {
     vibrationSlider.addEventListener('input', () => {
         vibrationDuration = parseInt(vibrationSlider.value);
@@ -512,6 +492,7 @@ if (volumeSlider) {
     });
 }
 
+// Sonido y vibración
 function playSoundPreview() {
     if (volumeLevel <= 0) return;
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -558,6 +539,7 @@ function provideFeedback(type = 'op') {
     playSound(type);
 }
 
+// Modales
 function toggleSettings() {
     provideFeedback('op');
     settingsModal.classList.add('active');
@@ -581,6 +563,7 @@ function showAbout() {
     aboutModal.classList.add('active');
 }
 
+// Tema
 function initTheme() {
     const savedTheme = localStorage.getItem('calc-theme');
     const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -608,206 +591,204 @@ function toggleTheme() {
 }
 
 // ============================================================================
-// 🇻🇪 LÓGICA DE FECHA EFECTIVA
+// 🇻🇪 LÓGICA DE FECHA EFECTIVA PARA TASAS BCV
 // ============================================================================
 
-function getEffectiveRateDate(now = null) {
-  if (!now) {
-    now = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Caracas" }));
-  }
-  
-  const hora = now.getHours();
-  let fechaTasa = new Date(now);
-  
-  if (hora < 12) {
-    fechaTasa.setDate(fechaTasa.getDate() - 1);
-  }
-  
-  let intentos = 0;
-  while (intentos < 7) {
-    const diaSemana = fechaTasa.getDay();
-    const esFinDeSemana = (diaSemana === 0 || diaSemana === 6);
-    const esFeriado = esFeriadoVenezuela(fechaTasa);
-    
-    if (esFinDeSemana || esFeriado) {
-      fechaTasa.setDate(fechaTasa.getDate() - 1);
-      intentos++;
-      continue;
+function getEffectiveRateDate() {
+    const now = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Caracas" }));
+    const hora = now.getHours();
+    let fechaTasa = new Date(now);
+
+    // Antes de las 12pm usamos la tasa del día anterior
+    if (hora < 12) {
+        fechaTasa.setDate(fechaTasa.getDate() - 1);
     }
-    break;
-  }
-  
-  return fechaTasa.toISOString().split('T')[0];
+
+    // Retroceder hasta encontrar un día hábil
+    let intentos = 0;
+    while (intentos < 7) {
+        const dia = fechaTasa.getDay();
+        const esFinDeSemana = (dia === 0 || dia === 6);
+        const esFeriado = esFeriadoVenezuela(fechaTasa);
+        if (esFinDeSemana || esFeriado) {
+            fechaTasa.setDate(fechaTasa.getDate() - 1);
+            intentos++;
+            continue;
+        }
+        break;
+    }
+
+    return fechaTasa.toISOString().split('T')[0];
 }
 
 function esFeriadoVenezuela(date) {
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  const fechaStr = `${mm}-${dd}`;
-  const year = date.getFullYear();
-  
-  const feriadosFijos = [
-    '01-01', '01-06', '01-14', '03-19', '05-01', '06-24', '07-24',
-    '08-15', '09-11', '11-18', '12-08', '12-24', '12-25', '12-31'
-  ];
-  
-  const feriadosMoviles = {
-    2025: ['03-03', '03-04', '04-17', '04-18', '06-02', '06-16', '06-23', '08-18', '09-15', '11-24'],
-    2026: ['02-23', '02-24', '04-02', '04-03'],
-    2027: ['02-15', '02-16', '03-25', '03-26']
-  };
-  
-  return feriadosFijos.includes(fechaStr) || 
-         (feriadosMoviles[year] && feriadosMoviles[year].includes(fechaStr));
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const fechaStr = `${mm}-${dd}`;
+    const year = date.getFullYear();
+
+    // Feriados que siempre caen en la misma fecha (fijos)
+    const feriadosFijos = [
+        '01-01', // Año Nuevo
+        '01-06', // Día de Reyes
+        '01-14', // Día de la Divina Pastora
+        '03-19', // Día de San José
+        '05-01', // Día del Trabajador
+        '06-24', // Batalla de Carabobo
+        '07-24', // Natalicio del Libertador
+        '11-18', // Día de la Virgen del Rosario
+        '12-24', // Nochebuena
+        '12-25', // Navidad
+        '12-31'  // Fin de Año
+    ];
+
+    // Feriados móviles por año según calendarios oficiales BCV/SUDEBAN
+    const feriadosMoviles = {
+        // Fuente: SUDEBAN Calendario Bancario 2025
+        2025: [
+            '01-13', // Lunes bancario por Divina Pastora (14/01)
+            '03-03', '03-04', // Carnaval
+            '04-17', '04-18', // Semana Santa
+            '05-29', // Ascensión del Señor (jueves)
+            '06-02', // Lunes bancario por Ascensión
+            '06-13', // Día de San Antonio (viernes)
+            '06-16', // Lunes bancario por Corpus Christi
+            '06-19', // Corpus Christi (jueves)
+            '06-23', // Lunes bancario por Corpus Christi
+            '08-15', // Asunción de Nuestra Señora
+            '08-18', // Lunes bancario por Asunción
+            '09-11', // Virgen de Coromoto
+            '09-15', // Lunes bancario por Coromoto
+            '11-24', // Lunes bancario por Virgen del Rosario
+            '12-08'  // Inmaculada Concepción
+        ],
+        // Fuente: BCV Calendario Bancario 2026
+        2026: [
+            '01-12', // Lunes bancario por Día de Reyes (6/01 martes)
+            '01-19', // Lunes bancario por Divina Pastora (14/01 miércoles)
+            '02-16', '02-17', // Carnaval
+            '04-02', '04-03', // Semana Santa
+            '05-14', // Ascensión del Señor (jueves 14/05)
+            '05-18', // Lunes bancario por Ascensión
+            '06-04', // Corpus Christi (jueves 4/06)
+            '06-08', // Lunes bancario por Corpus Christi
+            '06-29', // Día de San Pedro y San Pablo
+            '08-15', // Asunción de Nuestra Señora (sábado, no ejecuta)
+            '09-11', // Virgen de Coromoto (viernes 11/09)
+            '09-14', // Lunes bancario por Coromoto
+            '10-12', // Resistencia Indígena
+            '10-26', // San José Gregorio Hernández
+            '11-23', // Lunes bancario por Virgen del Rosario (18/11 miércoles)
+            '12-08', // Inmaculada Concepción (martes)
+            '12-14'  // Lunes bancario por Inmaculada
+        ]
+    };
+
+    return feriadosFijos.includes(fechaStr) ||
+           (feriadosMoviles[year] && feriadosMoviles[year].includes(fechaStr));
 }
 
 function formatDateVE(dateStr) {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${d}/${m}/${y}`;
+    if (!dateStr) return '';
+    const [y, m, d] = dateStr.split('-');
+    return `${d}/${m}/${y}`;
 }
 
 // ============================================================================
-// 💱 OBTENCIÓN DE TASAS - API PRIMERO, CACHE SOLO FALLBACK
+// 💱 OBTENCIÓN DE TASAS - APIs históricas dolarapi.com
 // ============================================================================
 
-async function fetchBCVRates(forzar = false) {
-  if (navigator.vibrate && vibrationDuration > 0) navigator.vibrate(30);
-  
-  if (forzar) {
-    localStorage.removeItem('dolivar_last_usd_rate');
-    localStorage.removeItem('dolivar_last_eur_rate');
-    localStorage.removeItem('dolivar_last_date');
-    rateLabel.innerHTML = "FORZANDO...";
-    console.log("🔍 [FORZAR] Cache limpiado");
-  } else {
-    rateLabel.innerHTML = "Sincronizando...";
-  }
-  
-  dateLabel.innerHTML = "";
-  rateLabel.classList.add('loading-pulse');
+async function fetchBCVRates() {
+    if (navigator.vibrate && vibrationDuration > 0) navigator.vibrate(30);
 
-  const fechaEfectiva = getEffectiveRateDate();
-  const fechaActual = new Date().toISOString().split('T')[0];
-  const horaVE = new Date().toLocaleString("en-US", {timeZone: "America/Caracas", hour: "numeric", hour12: false});
-  const esMismaFecha = (fechaEfectiva === fechaActual);
-  
-  console.log(`🔍 [DEBUG] Fecha efectiva: ${fechaEfectiva} | Hora VE: ${horaVE}`);
-  
-  // ✅ CAPA 1: API SIEMPRE PRIMERO (no cache)
-  try {
-    const endpoint = esMismaFecha 
-      ? 'https://bcv-api.rafnixg.dev/rates/'
-      : `https://bcv-api.rafnixg.dev/rates/${fechaEfectiva}`;
-    
-    console.log(`🔍 [DEBUG] Llamando API: ${endpoint}`);
-    const response = await fetch(endpoint);
-    
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    
-    const data = await response.json();
-    console.log(`🔍 [DEBUG] Respuesta API:`, data);
-    
-    let apiUSD = null;
-    let apiEUR = null;
-    
-    if (data.usd) {
-      apiUSD = parseFloat(data.usd);
-    } else if (data.dolar?.venta) {
-      apiUSD = parseFloat(data.dolar.venta);
-    } else if (data.dolar) {
-      apiUSD = parseFloat(data.dolar);
+    rateLabel.innerHTML = "Sincronizando tasas...";
+    dateLabel.innerHTML = "";
+    rateLabel.classList.add('loading-pulse');
+
+    const fechaEfectiva = getEffectiveRateDate();
+
+    // ✅ CAPA 1: Caché válido por fecha efectiva
+    const cacheUSD = localStorage.getItem('dolivar_last_usd_rate');
+    const cacheEUR = localStorage.getItem('dolivar_last_eur_rate');
+    const cacheDate = localStorage.getItem('dolivar_last_date');
+
+    if (cacheUSD && cacheEUR && cacheDate === fechaEfectiva) {
+        bcvRate = parseFloat(cacheUSD);
+        eurRate = parseFloat(cacheEUR);
+        displayRates(fechaEfectiva);
+        return;
     }
-    
-    if (data.eur) {
-      apiEUR = parseFloat(data.eur);
-    } else if (data.euro?.venta) {
-      apiEUR = parseFloat(data.euro.venta);
-    } else if (data.euro) {
-      apiEUR = parseFloat(data.euro);
-    }
-    
-    if (apiUSD) {
-      bcvRate = apiUSD;
-      eurRate = apiEUR ? apiEUR : await calcularEURDesdeUSD(bcvRate, fechaEfectiva);
-      
-      saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
-      displayRates(fechaEfectiva, 'api');
-      return; // ✅ Éxito, no usar cache
-    }
-  } catch (e1) {
-    console.warn("🔍 API falló, usando cache como fallback:", e1);
-  }
-  
-  // ✅ CAPA 2: Scraping BCV (solo antes de 4 PM)
-  if (horaVE < 16) {
+
+    // ✅ CAPA 2: APIs históricas de dolarapi.com
     try {
-      const response = await fetch(
-        "https://corsproxy.io/?url=" + encodeURIComponent("https://www.bcv.org.ve/")
-      );
-      if (response.ok) {
-        const html = await response.text();
-        const usdMatch = html.match(/id="dolar"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
-        const eurMatch = html.match(/id="euro"[^]*?centrado[^>]*>\s*<strong>\s*([\d,\.]+)\s*<\/strong>/);
+        const [resUSD, resEUR] = await Promise.all([
+            fetch("https://ve.dolarapi.com/v1/historicos/dolares"),
+            fetch("https://ve.dolarapi.com/v1/historicos/euros")
+        ]);
 
-        if (usdMatch && eurMatch) {
-          bcvRate = parseFloat(usdMatch[1].replace(/\./g, '').replace(',', '.'));
-          eurRate = parseFloat(eurMatch[1].replace(/\./g, '').replace(',', '.'));
-          
-          saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
-          displayRates(fechaEfectiva, 'bcv');
-          return;
+        if (resUSD.ok && resEUR.ok) {
+            const dataUSD = await resUSD.json();
+            const dataEUR = await resEUR.json();
+
+            const registroUSD = dataUSD.find(r => r.fecha === fechaEfectiva);
+            const registroEUR = dataEUR.find(r => r.fecha === fechaEfectiva);
+
+            if (registroUSD && registroUSD.promedio) {
+                bcvRate = parseFloat(registroUSD.promedio);
+                eurRate = registroEUR && registroEUR.promedio
+                    ? parseFloat(registroEUR.promedio)
+                    : bcvRate * 1.16;
+
+                saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
+                displayRates(fechaEfectiva);
+                return;
+            }
         }
-      }
-    } catch (e2) {
-      console.warn("🔍 Scraping falló:", e2);
+    } catch (e1) {
+        console.warn("API históricos falló:", e1);
     }
-  }
-  
-  // ✅ CAPA 3: Cache SOLO como último recurso
-  const cacheUSD = localStorage.getItem('dolivar_last_usd_rate');
-  const cacheEUR = localStorage.getItem('dolivar_last_eur_rate');
-  const cacheDate = localStorage.getItem('dolivar_last_date');
-  
-  if (cacheUSD && cacheEUR && cacheDate) {
-    bcvRate = parseFloat(cacheUSD);
-    eurRate = parseFloat(cacheEUR);
-    updateUI();
-    rateLabel.innerHTML = `USD: <span class="rate-value">${bcvRate.toLocaleString('de-DE', {minimumFractionDigits: 2})}</span> | EUR: <span class="rate-value">${eurRate.toLocaleString('de-DE', {minimumFractionDigits: 2})}</span> Bs`;
-    dateLabel.innerHTML = `⚠️ SIN CONEXIÓN - Datos del ${formatDateVE(cacheDate)}`;
-    rateLabel.classList.remove('loading-pulse');
-    console.log(`🔍 [FALLBACK] Usando cache: USD=${bcvRate}, EUR=${eurRate}`);
-    return;
-  }
-  
-  // ❌ Error total
-  rateLabel.innerHTML = "⚠️ Sin conexión";
-  dateLabel.innerHTML = 'Toque largo para reintentar';
-  rateLabel.classList.remove('loading-pulse');
-}
 
-async function calcularEURDesdeUSD(usdBCV, fecha) {
-  try {
-    const response = await fetch(
-      `https://api.exchangerate.host/${fecha}?base=USD&symbols=EUR`
-    );
-    
-    if (response.ok) {
-      const data = await response.json();
-      const ratioEURUSD = data.rates.EUR;
-      
-      if (ratioEURUSD && ratioEURUSD > 0) {
-        const eurBCV = usdBCV / ratioEURUSD;
-        console.log(`🔍 EUR calculado: ${usdBCV} / ${ratioEURUSD} = ${eurBCV.toFixed(2)}`);
-        return eurBCV;
-      }
+    // ✅ CAPA 3: API RafnixG como respaldo
+    try {
+        const hoy = new Date().toISOString().split('T')[0];
+        const endpoint = fechaEfectiva === hoy
+            ? 'https://bcv-api.rafnixg.dev/rates/'
+            : `https://bcv-api.rafnixg.dev/rates/${fechaEfectiva}`;
+
+        const response = await fetch(endpoint);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.dolar && data.dolar.venta) {
+                bcvRate = parseFloat(data.dolar.venta);
+                eurRate = data.euro && data.euro.venta
+                    ? parseFloat(data.euro.venta)
+                    : bcvRate * 1.16;
+                saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
+                displayRates(fechaEfectiva);
+                return;
+            }
+        }
+    } catch (e2) {
+        console.warn("RafnixG falló:", e2);
     }
-  } catch (e) {
-    console.warn("🔍 Ratio EUR/USD no disponible:", e);
-  }
-  
-  console.log(`🔍 EUR fallback: ${usdBCV} × 1.16`);
-  return usdBCV * 1.16;
+
+    // ✅ CAPA 4: Caché antiguo
+    if (cacheUSD && cacheEUR && cacheDate) {
+        bcvRate = parseFloat(cacheUSD);
+        eurRate = parseFloat(cacheEUR);
+        updateUI();
+        const usdF = bcvRate.toLocaleString('de-DE', {minimumFractionDigits: 2});
+        const eurF = eurRate.toLocaleString('de-DE', {minimumFractionDigits: 2});
+        rateLabel.innerHTML = `USD: <span class="rate-value">${usdF}</span> | EUR: <span class="rate-value">${eurF}</span> Bs`;
+        dateLabel.innerHTML = `⚠️ Datos del ${formatDateVE(cacheDate)} — Toca para actualizar`;
+        rateLabel.classList.remove('loading-pulse');
+        return;
+    }
+
+    // ❌ Sin datos
+    rateLabel.innerHTML = "⚠️ Sin conexión. Toca para reintentar";
+    dateLabel.innerHTML = '';
+    rateLabel.classList.remove('loading-pulse');
 }
 
 function saveRatesToStorage(usd, eur, date) {
@@ -816,62 +797,26 @@ function saveRatesToStorage(usd, eur, date) {
     localStorage.setItem('dolivar_last_date', date);
 }
 
-function displayRates(fechaUsada = null, fuente = 'api') {
+function displayRates(fechaUsada) {
     if (!bcvRate || !eurRate) return;
-    
+
     const usdFormatted = bcvRate.toLocaleString('de-DE', {minimumFractionDigits: 2});
     const eurFormatted = eurRate.toLocaleString('de-DE', {minimumFractionDigits: 2});
     rateLabel.innerHTML = `USD: <span class="rate-value">${usdFormatted}</span> | EUR: <span class="rate-value">${eurFormatted}</span> Bs`;
-    
-    const dateStr = fechaUsada || localStorage.getItem('dolivar_last_date') || new Date().toISOString();
-    const fechaFinal = formatDateVE(dateStr);
-    
-    const mañana = new Date();
-    mañana.setDate(mañana.getDate() + 1);
-    const fechaMañana = mañana.toISOString().split('T')[0];
-    
-    const mensajeVigencia = `VIGENTE HASTA: 12 PM ${formatDateVE(fechaMañana)}`;
-    
-    const indicadores = {
-      'api': '🟢',
-      'bcv': '🔵',
-      'cache': '🟡',
-      'fallback': '🟠'
-    };
-    const indicator = indicadores[fuente] || '⚪';
-    
-    dateLabel.innerHTML = `${mensajeVigencia} <span title="Fuente: ${fuente}">${indicator}</span>`;
-    
-    console.log(`🔍 Tasas: USD=${bcvRate}, EUR=${eurRate}, Fecha=${dateStr}, Fuente=${fuente}`);
-    
+
+    const fechaFinal = formatDateVE(fechaUsada || localStorage.getItem('dolivar_last_date') || new Date().toISOString().split('T')[0]);
+    dateLabel.innerHTML = `TASAS VIGENTES AL: ${fechaFinal}`;
+
     rateLabel.classList.remove('loading-pulse');
     updateUI();
 }
 
-// ============================================================================
-// ⏱️ TOQUE LARGO PARA FORZAR
-// ============================================================================
-
-function startLongPress() {
-  longPressTimer = setTimeout(() => {
-    console.log("🔍 Toque largo - Forzando");
-    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-    fetchBCVRates(true);
-  }, 3000);
-}
-
-function cancelLongPress() {
-  if (longPressTimer) {
-    clearTimeout(longPressTimer);
-    longPressTimer = null;
-  }
-}
-
+// ✅ Cambiar par desde configuración
 function setInputPair(pair) {
     provideFeedback('op');
     inputPair = pair;
     localStorage.setItem('dolivar_input_pair', pair);
-    
+
     if (pair === 'usd-bs') {
         inputCurrency = 'USD';
         currencySymbol.textContent = 'US$';
@@ -879,7 +824,7 @@ function setInputPair(pair) {
         inputCurrency = 'EUR';
         currencySymbol.textContent = '€';
     }
-    
+
     currentInputText = '0';
     expressionTokens = [];
     isNewInput = true;
@@ -887,6 +832,7 @@ function setInputPair(pair) {
     closeAllModals();
 }
 
+// ✅ Alternar moneda dentro del par
 function toggleCurrencyMode() {
     provideFeedback('op');
     if (!bcvRate || !eurRate) {
@@ -925,9 +871,10 @@ function toggleCurrencyMode() {
     updateUI();
 }
 
+// Actualizar UI
 function updateUI() {
     let prefix, convertedText;
-    
+
     if (inputCurrency === 'USD') {
         prefix = '$ ';
     } else if (inputCurrency === 'EUR') {
@@ -1000,6 +947,7 @@ function updateHistory() {
     opHistoryDisplay.innerText = displayParts.join('');
 }
 
+// Botones numéricos
 function addNum(n) {
     provideFeedback('num');
     if (isNewInput) {
@@ -1051,12 +999,12 @@ function evaluateWithPrecedence(tokens, usdRate, eurRate) {
             let leftUSD = parseFloat(left.value);
             if (left.currency === 'BS') leftUSD /= usdRate;
             else if (left.currency === 'EUR') leftUSD = (leftUSD * eurRate) / usdRate;
-            
+
             const rightNum = parseFloat(right.value);
-            const resultUSD = workTokens[i] === '*' 
-                ? leftUSD * rightNum 
+            const resultUSD = workTokens[i] === '*'
+                ? leftUSD * rightNum
                 : (rightNum === 0 ? 0 : leftUSD / rightNum);
-                
+
             workTokens.splice(i - 1, 3, { value: resultUSD.toString(), currency: 'USD' });
             i -= 2;
         }
@@ -1088,7 +1036,7 @@ function calc() {
     }
     expressionTokens.push(captureCurrentNumber());
     const resultUSD = evaluateWithPrecedence(expressionTokens, bcvRate, eurRate);
-    
+
     if (inputPair === 'usd-bs') {
         if (inputCurrency === 'USD') {
             currentInputText = resultUSD.toFixed(2);
@@ -1102,7 +1050,7 @@ function calc() {
             currentInputText = (resultUSD * bcvRate).toFixed(2);
         }
     }
-    
+
     if (currentInputText.endsWith('.00')) {
         currentInputText = parseInt(parseFloat(currentInputText)).toString();
     }
@@ -1113,20 +1061,20 @@ function calc() {
     updateUI();
 }
 
-function clearDisplay() { 
-    provideFeedback('clear'); 
+function clearDisplay() {
+    provideFeedback('clear');
     currentInputText = '0';
     expressionTokens = [];
     lastOperator = null;
     nextNumberIsMultiplier = false;
     isNewInput = true;
-    updateUI(); 
+    updateUI();
 }
 
-// ✅ AL ABRIR: SIEMPRE CONSULTA API (no cache)
-window.onload = () => { 
-    initTheme(); 
-    fetchBCVRates(false); // false = no forzar, pero igual consulta API primero
+// Inicialización
+window.onload = () => {
+    initTheme();
+    fetchBCVRates();
     const savedPair = localStorage.getItem('dolivar_input_pair');
     if (savedPair) {
         inputPair = savedPair;
