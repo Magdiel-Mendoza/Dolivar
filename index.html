@@ -664,7 +664,10 @@ fechaTasa = new Date(fechaTasa.toLocaleString("en-US", { timeZone: "America/Cara
         break;
     }
 
-    return fechaTasa.toISOString().split('T')[0];
+const year = fechaTasa.getFullYear();
+const month = String(fechaTasa.getMonth() + 1).padStart(2, '0');
+const day = String(fechaTasa.getDate()).padStart(2, '0');
+return `${year}-${month}-${day}`;
 }
 
 function esFeriadoVenezuela(date) {
