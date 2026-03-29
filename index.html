@@ -774,8 +774,8 @@ async function fetchBCVRates() {
             const dataUSD = await resUSD.json();
             const dataEUR = await resEUR.json();
 
-            const registroUSD = dataUSD.find(r => r.fecha === fechaEfectiva);
-            const registroEUR = dataEUR.find(r => r.fecha === fechaEfectiva);
+            const registroUSD = dataUSD.find(r => r.fecha === fechaEfectiva && r.fuente === 'oficial');
+            const registroEUR = dataEUR.find(r => r.fecha === fechaEfectiva && r.fuente === 'oficial');
 
             if (registroUSD && registroUSD.promedio) {
                 bcvRate = parseFloat(registroUSD.promedio);
