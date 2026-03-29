@@ -633,7 +633,7 @@ function toggleTheme() {
 
 function getEffectiveRateDate(fechaSimulada = null) {
     const now = fechaSimulada
-        ? new Date(fechaSimulada)
+        ? new Date(fechaSimulada.toLocaleString("en-US", { timeZone: "America/Caracas" }))
         : new Date(new Date().toLocaleString("en-US", { timeZone: "America/Caracas" }));
     const hora = now.getHours();
     const diaSemana = now.getDay(); // 0=dom, 1=lun... 6=sab
@@ -644,9 +644,11 @@ function getEffectiveRateDate(fechaSimulada = null) {
     // Si hoy no es día hábil, o es antes de las 12pm, retrocedemos un día.
     const esHabilHoy = !esFeriadoVenezuela(now) && diaSemana !== 0 && diaSemana !== 6;
 
-    if (!esHabilHoy || hora < 12) {
-        fechaTasa.setDate(fechaTasa.getDate() - 1);
-    }
+if (!esHabilHoy || hora < 12) {
+    fechaTasa.setDate(fechaTasa.getDate() - 1);
+}
+// Asegurar que fechaTasa también use hora Venezuela
+fechaTasa = new Date(fechaTasa.toLocaleString("en-US", { timeZone: "America/Caracas" }));
 
     // Retroceder hasta encontrar un día hábil
     let intentos = 0;
