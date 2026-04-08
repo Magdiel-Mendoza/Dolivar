@@ -644,7 +644,7 @@ function getEffectiveRateDate(fechaSimulada = null) {
     // Si hoy no es día hábil, o es antes de las 12pm, retrocedemos un día.
     const esHabilHoy = !esFeriadoVenezuela(now) && diaSemana !== 0 && diaSemana !== 6;
 
-if (!esHabilHoy || hora < 12) {
+if (!esHabilHoy) {
     fechaTasa.setDate(fechaTasa.getDate() - 1);
 }
 // Asegurar que fechaTasa también use hora Venezuela
