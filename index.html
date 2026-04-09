@@ -646,6 +646,11 @@ function getEffectiveRateDate(fechaSimulada = null) {
 
 if (!esHabilHoy) {
     fechaTasa.setDate(fechaTasa.getDate() - 1);
+} else {
+    // La tasa del día hábil está vigente desde medianoche
+    // no retrocedemos nunca en día hábil
+}
+    fechaTasa.setDate(fechaTasa.getDate() - 1);
 }
 // Asegurar que fechaTasa también use hora Venezuela
 fechaTasa = new Date(fechaTasa.toLocaleString("en-US", { timeZone: "America/Caracas" }));
