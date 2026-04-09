@@ -663,12 +663,6 @@ function getEffectiveRateDate(fechaSimulada = null) {
     return `${year}-${month}-${day}`;
 }
 
-const year = fechaTasa.getFullYear();
-const month = String(fechaTasa.getMonth() + 1).padStart(2, '0');
-const day = String(fechaTasa.getDate()).padStart(2, '0');
-return `${year}-${month}-${day}`;
-}
-
 function esFeriadoVenezuela(date) {
     const mm = String(date.getMonth() + 1).padStart(2, '0');
     const dd = String(date.getDate()).padStart(2, '0');
