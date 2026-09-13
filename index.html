@@ -399,7 +399,7 @@
     <div id="about-modal" class="about-modal">
         <h3 class="font-bold text-lg mb-3">Acerca de</h3>
         <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.2.9 — 12/09/2026</p>
+            <p class="highlight">DOLIVAR v1.3.0 — 13/09/2026</p>
             <p class="mt-4">Desarrollador Principal</p>
             <p>Magdiel Mendoza</p>
             <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong>, <strong>Gemini AI</strong> y <strong>Claude AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
@@ -469,8 +469,8 @@
 <script>
 /* 
  * Dolivar - Calculadora BCV Profesional
- * Última actualización: 27/03/2026
- * v1.2.9: API Chitty como fuente principal — actualizada diariamente, USD y EUR correctos
+ * Última actualización: 13/09/2026
+ * v1.3.0: API Chitty como fuente principal — actualizada diariamente, USD y EUR correctos
  */
 
 let currentInputText = '0';
@@ -740,7 +740,7 @@ function formatDateVE(dateStr) {
 // 💱 OBTENCIÓN DE TASAS - APIs históricas dolarapi.com
 // ============================================================================
 
-async function fetchBCVRates() {
+async function fetchBCVRates(forzar = false) {
     if (navigator.vibrate && vibrationDuration > 0) navigator.vibrate(30);
 
     rateLabel.innerHTML = "Sincronizando tasas...";
@@ -749,12 +749,12 @@ async function fetchBCVRates() {
 
     const fechaEfectiva = getEffectiveRateDate();
 
-    // ✅ CAPA 1: Caché válido por fecha efectiva
+    // ✅ CAPA 1: Caché válido por fecha efectiva (solo si no se fuerza)
     const cacheUSD = localStorage.getItem('dolivar_last_usd_rate');
     const cacheEUR = localStorage.getItem('dolivar_last_eur_rate');
     const cacheDate = localStorage.getItem('dolivar_last_date');
 
-    if (cacheUSD && cacheEUR && cacheDate === fechaEfectiva) {
+    if (!forzar && cacheUSD && cacheEUR && cacheDate === fechaEfectiva) {
         bcvRate = parseFloat(cacheUSD);
         eurRate = parseFloat(cacheEUR);
         displayRates(fechaEfectiva);
