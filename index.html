@@ -399,7 +399,7 @@
     <div id="about-modal" class="about-modal">
         <h3 class="font-bold text-lg mb-3">Acerca de</h3>
         <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.3.3 — 13/09/2026</p>
+            <p class="highlight">DOLIVAR v1.3.4 — 13/09/2026</p>
             <p class="mt-4">Desarrollador Principal</p>
             <p>Magdiel Mendoza</p>
             <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong>, <strong>Gemini AI</strong> y <strong>Claude AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
@@ -470,7 +470,7 @@
 /* 
  * Dolivar - Calculadora BCV Profesional
  * Última actualización: 13/09/2026
- * v1.3.3: API Chitty como fuente principal — actualizada diariamente, USD y EUR correctos
+ * v1.3.4: API Chitty como fuente principal — actualizada diariamente, USD y EUR correctos
  */
 
 let currentInputText = '0';
@@ -483,6 +483,7 @@ let inputCurrency = 'USD';
 let audioCtx = null;
 let lastOperator = null;
 let nextNumberIsMultiplier = false;
+let mostrandoSubtotal = false;
 let volumeLevel = parseFloat(localStorage.getItem('dolivar_volume') || '1.0');
 let vibrationDuration = parseInt(localStorage.getItem('dolivar_vibration') || '100');
 
@@ -982,7 +983,7 @@ function updateHistory() {
             }
         }
     }
-    if (currentInputText !== '0' || expressionTokens.length === 0) {
+    if (!mostrandoSubtotal && (currentInputText !== '0' || expressionTokens.length === 0)) {
         if (nextNumberIsMultiplier) {
             displayParts.push(currentInputText);
         } else {
@@ -996,6 +997,7 @@ function updateHistory() {
 // Botones numéricos
 function addNum(n) {
     provideFeedback('num');
+    mostrandoSubtotal = false;
     if (isNewInput) {
         currentInputText = (n === '.') ? '0.' : n;
         isNewInput = false;
@@ -1040,6 +1042,7 @@ function setOperator(op) {
 
     // Mostrar subtotal en display pero sin agregarlo al histórico
     isNewInput = true;
+    mostrandoSubtotal = true;
     currentInputText = subtotal.toFixed(2).replace(/\.00$/, '');
 
     updateUI();
@@ -1122,6 +1125,7 @@ function clearDisplay() {
     expressionTokens = [];
     lastOperator = null;
     nextNumberIsMultiplier = false;
+    mostrandoSubtotal = false;
     isNewInput = true;
     updateUI();
 }
