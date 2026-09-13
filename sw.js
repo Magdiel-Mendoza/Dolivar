@@ -1,9 +1,9 @@
 /*
  * Dolivar - Service Worker
- * v1.3.1 — 13/09/2026
+ * v1.3.2 — 13/09/2026
  */
 
-const CACHE_NAME = 'dolivar-cache-v1.3.1';
+const CACHE_NAME = 'dolivar-cache-v1.3.2';
 const ASSETS = [
     './',
     './index.html',
