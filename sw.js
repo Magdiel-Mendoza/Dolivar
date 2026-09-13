@@ -1,6 +1,6 @@
 /*
  * Dolivar - Service Worker
- * v1.2.8 — 28/03/2026
+ * v1.3.1 — 13/09/2026
  */
 
 const CACHE_NAME = 'dolivar-cache-v1.3.1';
@@ -33,9 +33,10 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-    if (event.request.url.includes('dolarapi.com') ||
-        event.request.url.includes('rafnixg.dev') ||
-        event.request.url.includes('tailwindcss.com')) {
+if (event.request.url.includes('dolarapi.com') ||
+    event.request.url.includes('rafnixg.dev') ||
+    event.request.url.includes('tailwindcss.com') ||
+    event.request.url.includes('chitty400.github.io')) {
         event.respondWith(fetch(event.request).catch(() => new Response('')));
         return;
     }
