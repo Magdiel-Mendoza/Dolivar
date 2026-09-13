@@ -399,7 +399,7 @@
     <div id="about-modal" class="about-modal">
         <h3 class="font-bold text-lg mb-3">Acerca de</h3>
         <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.3.0 — 13/09/2026</p>
+            <p class="highlight">DOLIVAR v1.3.1 — 13/09/2026</p>
             <p class="mt-4">Desarrollador Principal</p>
             <p>Magdiel Mendoza</p>
             <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong>, <strong>Gemini AI</strong> y <strong>Claude AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
@@ -470,7 +470,7 @@
 /* 
  * Dolivar - Calculadora BCV Profesional
  * Última actualización: 13/09/2026
- * v1.3.0: API Chitty como fuente principal — actualizada diariamente, USD y EUR correctos
+ * v1.3.1: API Chitty como fuente principal — actualizada diariamente, USD y EUR correctos
  */
 
 let currentInputText = '0';
@@ -831,19 +831,30 @@ function saveRatesToStorage(usd, eur, date) {
     localStorage.setItem('dolivar_last_date', date);
 }
 
-function displayRates(fechaUsada) {
+function displayRates(fechaUsada, forzado = false) {
     if (!bcvRate || !eurRate) return;
 
     const usdFormatted = bcvRate.toLocaleString('de-DE', {minimumFractionDigits: 2});
     const eurFormatted = eurRate.toLocaleString('de-DE', {minimumFractionDigits: 2});
-    rateLabel.innerHTML = `USD: <span class="rate-value">${usdFormatted}</span> | EUR: <span class="rate-value">${eurFormatted}</span> Bs`;
 
     const hoyVE = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Caracas" }));
     const hoyStr = formatDateVE(hoyVE.toISOString().split('T')[0]);
-    dateLabel.innerHTML = `TASAS VIGENTES PARA HOY: ${hoyStr}`;
 
-    rateLabel.classList.remove('loading-pulse');
-    updateUI();
+    if (forzado) {
+        rateLabel.innerHTML = `✅ USD: <span class="rate-value">${usdFormatted}</span> | EUR: <span class="rate-value">${eurFormatted}</span> Bs`;
+        dateLabel.innerHTML = `TASAS ACTUALIZADAS · ${hoyStr}`;
+        rateLabel.classList.remove('loading-pulse');
+        updateUI();
+        setTimeout(() => {
+            rateLabel.innerHTML = `USD: <span class="rate-value">${usdFormatted}</span> | EUR: <span class="rate-value">${eurFormatted}</span> Bs`;
+            dateLabel.innerHTML = `TASAS VIGENTES PARA HOY: ${hoyStr}`;
+        }, 2500);
+    } else {
+        rateLabel.innerHTML = `USD: <span class="rate-value">${usdFormatted}</span> | EUR: <span class="rate-value">${eurFormatted}</span> Bs`;
+        dateLabel.innerHTML = `TASAS VIGENTES PARA HOY: ${hoyStr}`;
+        rateLabel.classList.remove('loading-pulse');
+        updateUI();
+    }
 }
 
 // ✅ Cambiar par desde configuración
