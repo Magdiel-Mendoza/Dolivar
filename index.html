@@ -757,11 +757,11 @@ async function fetchBCVRates(forzar = false) {
     if (!forzar && cacheUSD && cacheEUR && cacheDate === fechaEfectiva) {
         bcvRate = parseFloat(cacheUSD);
         eurRate = parseFloat(cacheEUR);
-        displayRates(fechaEfectiva);
+        displayRates(fechaEfectiva, forzar);
         return;
     }
 
-    // ✅ CAPA 2: API Chitty (GitHub Pages - siempre actualizada)
+    // ✅ CAPA 2: API Chitty
     try {
         const res = await fetch("https://chitty400.github.io/chitty-bcv-api/latest.json");
         if (res.ok) {
@@ -770,7 +770,7 @@ async function fetchBCVRates(forzar = false) {
                 bcvRate = parseFloat(data.tasas.usd);
                 eurRate = data.tasas.eur ? parseFloat(data.tasas.eur) : bcvRate * 1.16;
                 saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
-                displayRates(fechaEfectiva);
+                displayRates(fechaEfectiva, forzar);
                 return;
             }
         }
@@ -798,7 +798,7 @@ async function fetchBCVRates(forzar = false) {
                     ? parseFloat(registroEUR.promedio)
                     : bcvRate * 1.16;
                 saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
-                displayRates(fechaEfectiva);
+                displayRates(fechaEfectiva, forzar);
                 return;
             }
         }
