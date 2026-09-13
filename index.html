@@ -399,7 +399,7 @@
     <div id="about-modal" class="about-modal">
         <h3 class="font-bold text-lg mb-3">Acerca de</h3>
         <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.3.2 — 13/09/2026</p>
+            <p class="highlight">DOLIVAR v1.3.3 — 13/09/2026</p>
             <p class="mt-4">Desarrollador Principal</p>
             <p>Magdiel Mendoza</p>
             <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong>, <strong>Gemini AI</strong> y <strong>Claude AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
@@ -470,7 +470,7 @@
 /* 
  * Dolivar - Calculadora BCV Profesional
  * Última actualización: 13/09/2026
- * v1.3.2: API Chitty como fuente principal — actualizada diariamente, USD y EUR correctos
+ * v1.3.3: API Chitty como fuente principal — actualizada diariamente, USD y EUR correctos
  */
 
 let currentInputText = '0';
@@ -1027,22 +1027,22 @@ function captureCurrentNumber() {
 function setOperator(op) {
     provideFeedback('op');
     if (currentInputText === '0' && expressionTokens.length === 0) return;
-    
-    // Calcular subtotal acumulado para mostrarlo mientras se espera el siguiente número
-    const tokensTemporal = [...expressionTokens, captureCurrentNumber()];
-    const subtotal = evaluateWithPrecedence(tokensTemporal, bcvRate, eurRate);
-    
+
+    // Guardar el número actual en los tokens
     expressionTokens.push(captureCurrentNumber());
     expressionTokens.push(op);
     lastOperator = op;
     nextNumberIsMultiplier = (op === '*' || op === '/');
+
+    // Calcular subtotal con lo acumulado hasta ahora
+    const tokensSinOp = expressionTokens.slice(0, -1);
+    const subtotal = evaluateWithPrecedence(tokensSinOp, bcvRate, eurRate);
+
+    // Mostrar subtotal en display pero sin agregarlo al histórico
     isNewInput = true;
     currentInputText = subtotal.toFixed(2).replace(/\.00$/, '');
-    
+
     updateUI();
-    
-    // Marcar que el display muestra subtotal, no entrada nueva
-    isNewInput = true;
 }
 
 function evaluateWithPrecedence(tokens, usdRate, eurRate) {
