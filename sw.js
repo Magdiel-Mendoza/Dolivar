@@ -3,7 +3,7 @@
  * v1.2.8 — 28/03/2026
  */
 
-const CACHE_NAME = 'dolivar-cache-v1.2.9';
+const CACHE_NAME = 'dolivar-cache-v1.3.0';
 const ASSETS = [
     './',
     './index.html',
