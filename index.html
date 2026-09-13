@@ -399,7 +399,7 @@
     <div id="about-modal" class="about-modal">
         <h3 class="font-bold text-lg mb-3">Acerca de</h3>
         <div class="modal-content text-center">
-            <p class="highlight">DOLIVAR v1.2.7 — 27/03/2026</p>
+            <p class="highlight">DOLIVAR v1.2.9 — 12/09/2026</p>
             <p class="mt-4">Desarrollador Principal</p>
             <p>Magdiel Mendoza</p>
             <p class="mt-4">"Esta aplicación fue realizada con la ayuda de <strong>Qwen AI</strong>, <strong>Gemini AI</strong> y <strong>Claude AI</strong> para ofrecer una herramienta profesional y precisa al público venezolano."</p>
@@ -470,7 +470,7 @@
 /* 
  * Dolivar - Calculadora BCV Profesional
  * Última actualización: 27/03/2026
- * v1.2.7: Nueva lógica de tasas con APIs históricas dolarapi.com + lógica de fecha efectiva BCV
+ * v1.2.9: API Chitty como fuente principal — actualizada diariamente, USD y EUR correctos
  */
 
 let currentInputText = '0';
@@ -761,7 +761,24 @@ async function fetchBCVRates() {
         return;
     }
 
-    // ✅ CAPA 2: APIs históricas de dolarapi.com
+    // ✅ CAPA 2: API Chitty (GitHub Pages - siempre actualizada)
+    try {
+        const res = await fetch("https://chitty400.github.io/chitty-bcv-api/latest.json");
+        if (res.ok) {
+            const data = await res.json();
+            if (data.tasas && data.tasas.usd) {
+                bcvRate = parseFloat(data.tasas.usd);
+                eurRate = data.tasas.eur ? parseFloat(data.tasas.eur) : bcvRate * 1.16;
+                saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
+                displayRates(fechaEfectiva);
+                return;
+            }
+        }
+    } catch (e1) {
+        console.warn("Chitty falló:", e1);
+    }
+
+    // ✅ CAPA 3: APIs históricas de dolarapi.com como respaldo
     try {
         const [resUSD, resEUR] = await Promise.all([
             fetch("https://ve.dolarapi.com/v1/historicos/dolares"),
@@ -780,38 +797,13 @@ async function fetchBCVRates() {
                 eurRate = registroEUR && registroEUR.promedio
                     ? parseFloat(registroEUR.promedio)
                     : bcvRate * 1.16;
-
-                saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
-                displayRates(fechaEfectiva);
-                return;
-            }
-        }
-    } catch (e1) {
-        console.warn("API históricos falló:", e1);
-    }
-
-    // ✅ CAPA 3: API RafnixG como respaldo
-    try {
-        const hoy = new Date().toISOString().split('T')[0];
-        const endpoint = fechaEfectiva === hoy
-            ? 'https://bcv-api.rafnixg.dev/rates/'
-            : `https://bcv-api.rafnixg.dev/rates/${fechaEfectiva}`;
-
-        const response = await fetch(endpoint);
-        if (response.ok) {
-            const data = await response.json();
-            if (data.dolar && data.dolar.venta) {
-                bcvRate = parseFloat(data.dolar.venta);
-                eurRate = data.euro && data.euro.venta
-                    ? parseFloat(data.euro.venta)
-                    : bcvRate * 1.16;
                 saveRatesToStorage(bcvRate, eurRate, fechaEfectiva);
                 displayRates(fechaEfectiva);
                 return;
             }
         }
     } catch (e2) {
-        console.warn("RafnixG falló:", e2);
+        console.warn("dolarapi históricos falló:", e2);
     }
 
     // ✅ CAPA 4: Caché antiguo
